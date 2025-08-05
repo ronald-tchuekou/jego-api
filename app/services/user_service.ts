@@ -44,6 +44,12 @@ export default class UserService {
       }
     })
 
+    // Check if the user already exists
+    const existingUser = await User.query().where('email', user.email).first()
+    if (existingUser) {
+      throw new Error('User already exists')
+    }
+
     await user.save()
 
     UserRegistered.dispatch(user)
