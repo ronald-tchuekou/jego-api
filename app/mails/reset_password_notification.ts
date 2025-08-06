@@ -1,8 +1,8 @@
-import { BaseMail } from '@adonisjs/mail'
 import env from '#start/env'
+import { BaseMail } from '@adonisjs/mail'
 
 export default class ResetPasswordNotification extends BaseMail {
-  from = env.get('SMTP_FROM')
+  from = `JeGo <${env.get('SMTP_FROM')}>`
   subject = 'Reset Your Password'
 
   constructor(
