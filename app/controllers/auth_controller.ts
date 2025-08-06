@@ -6,6 +6,7 @@ import {
   loginValidator,
   registerValidator,
   resetPasswordValidator,
+  verifyEmail,
 } from '#validators/auth'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -55,6 +56,14 @@ export default class AuthController {
     })
   }
 
+  async revalidateToken({ auth, response }: HttpContext) {
+    const user = auth.use('api').getUserOrFail()
+    return response.ok({
+      user,
+      token: user.currentAccessToken.value?.release,
+    })
+  }
+
   /**
    * Request password reset
    */
@@ -78,9 +87,27 @@ export default class AuthController {
 
     const user = await userService.resetPassword(data.token, data.password)
 
+    const token = await User.accessTokens.create(user)
+
     return response.ok({
       message: 'Password has been reset successfully',
+      token: token.value!.release(),
       user,
+    })
+  }
+
+  @inject()
+  async verifyEmail({ request, response }: HttpContext, userService: UserService) {
+    const { token, userId } = await request.validateUsing(verifyEmail)
+
+    const user = await userService.verify(userId, token)
+
+    const accessToken = await User.accessTokens.create(user)
+
+    return response.ok({
+      message: 'Email has been verified successfully',
+      user,
+      token: accessToken.value!.release(),
     })
   }
 }

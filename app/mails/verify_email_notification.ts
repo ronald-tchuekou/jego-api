@@ -1,13 +1,14 @@
-import { BaseMail } from '@adonisjs/mail'
 import env from '#start/env'
+import { BaseMail } from '@adonisjs/mail'
 
 export default class VerifyEmailNotification extends BaseMail {
-  from = env.get('SMTP_FROM')
+  from = `JeGo <${env.get('SMTP_FROM')}>`
   replyTo = env.get('SMTP_FROM')
   subject = 'Verify email address'
 
   constructor(
     private userEmail: string,
+    private userId: string,
     private token: string
   ) {
     super()
@@ -21,10 +22,7 @@ export default class VerifyEmailNotification extends BaseMail {
     this.message.to(this.userEmail)
     this.message.subject(this.subject)
     this.message.htmlView('emails/verify_email/html', {
-      token: this.token,
-    })
-    this.message.textView('emails/verify_email/text', {
-      token: this.token,
+      tokenLink: `${env.get('FRONTEND_URL_VERIFY')}?token=${this.token}&userId=${this.userId}`,
     })
   }
 }

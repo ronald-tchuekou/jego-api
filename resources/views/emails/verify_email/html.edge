@@ -1,13 +1,169 @@
-@mjml()
-  <mjml>
-    <mj-body>
-      <mj-section>
-        <mj-column>
-          <mj-text>
-            Verify your email address
-          </mj-text>
-        </mj-column>
-      </mj-section>
-    </mj-body>
-  </mjml>
-@end
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Vérifiez votre adresse e-mail</title>
+    <!--[if gte mso 9]>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:AllowPNG/>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+    <![endif]-->
+    <style type="text/css">
+      /* Reset styles */
+      body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+      
+      /* Client-specific styles */
+      .ReadMsgBody { width: 100%; }
+      .ExternalClass { width: 100%; }
+      .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div { line-height: 100%; }
+      
+      /* Outlook specific */
+      table { border-collapse: collapse; }
+      .outlook-group-fix { width: 100% !important; }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333333;">
+    <!-- Wrapper table for Outlook -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #ffffff;">
+      <tr>
+        <td align="center" style="padding: 20px 0;">
+          <!-- Main container table -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; width: 100%;" class="outlook-group-fix">
+            <tr>
+              <td style="background-color: #f9f9f9; padding: 30px; border: 1px solid #dddddd; border-radius: 10px;">
+                
+                <!-- Header -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" style="padding-bottom: 30px;">
+                      <h1 style="margin: 0; font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; color: #333333; text-align: center;">
+                        Vérifiez votre adresse e-mail
+                      </h1>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Verification icon -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" style="padding: 20px 0; font-size: 48px; color: #dc3545;">
+                      ✉
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Welcome text -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="padding-bottom: 20px;">
+                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333333;">
+                        Bienvenue ! Merci de vous être inscrit. Pour finaliser votre inscription et sécuriser votre compte, veuillez vérifier votre adresse e-mail.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Instruction text -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="padding-bottom: 20px;">
+                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333333;">
+                        Cliquez sur le lien suivant pour vérifier votre adresse e-mail :
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Button -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" style="padding: 20px 0;">
+                      <!--[if mso]>
+                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ tokenLink }}" style="height:44px;v-text-anchor:middle;width:250px;" arcsize="11%" stroke="f" fillcolor="#dc3545">
+                        <w:anchorlock/>
+                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Vérifier mon adresse e-mail</center>
+                      </v:roundrect>
+                      <![endif]-->
+                      <!--[if !mso]><!-->
+                      <a href="{{ tokenLink }}" style="display: inline-block; padding: 12px 30px; background-color: #dc3545; color: #ffffff; text-decoration: none; border-radius: 5px; font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; text-align: center; border: none;">
+                        Vérifier mon adresse e-mail
+                      </a>
+                      <!--<![endif]-->
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Fallback link -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" style="padding: 10px 0 20px 0;">
+                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; color: #666666; text-align: center;">
+                        Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :<br>
+                        <span style="word-break: break-all; color: #dc3545;">{{ tokenLink }}</span>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Important notice -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="padding-bottom: 20px;">
+                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333333;">
+                        <strong>Important :</strong> Ce lien de vérification expirera dans 24 heures pour des raisons de sécurité.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Additional info -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="padding-bottom: 20px;">
+                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333333;">
+                        Une fois vérifié, vous aurez un accès complet à toutes les fonctionnalités de votre compte.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Ignore notice -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="padding-bottom: 30px;">
+                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333333;">
+                        Si vous n'avez pas créé de compte, veuillez ignorer cet e-mail et aucun compte ne sera créé.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Footer -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="border-top: 1px solid #dddddd; padding-top: 20px;">
+                      <p style="margin: 0 0 10px 0; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; color: #666666;">
+                        Ceci est un message automatisé, veuillez ne pas répondre à cet e-mail.
+                      </p>
+                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; color: #666666;">
+                        Si vous avez des questions, veuillez contacter notre équipe de support.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

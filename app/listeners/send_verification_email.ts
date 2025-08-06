@@ -8,7 +8,6 @@ export default class SendVerificationEmail {
   @inject()
   async handle(event: UserRegistered, userTokensService: UserTokenService) {
     const token = await userTokensService.generateNumeric(event.user)
-
-    await mail.send(new VerifyEmailNotification(event.user.email, token))
+    await mail.send(new VerifyEmailNotification(event.user.email, event.user.id, token))
   }
 }

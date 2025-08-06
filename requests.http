@@ -1,0 +1,20 @@
+### Login
+POST https://dev.api.jego.cm/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@jego.cm",
+  "password": "123456"
+}
+
+
+### Register
+POST http://localhost:3333/v1/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Ron",
+  "lastName": "Coder",
+  "email": "ronaldtchuekou@gmail.com",
+  "password": "password"
+}

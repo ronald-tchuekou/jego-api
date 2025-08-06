@@ -3,7 +3,7 @@ import UserPasswordResetRequested from '#events/user_password_reset_requested'
 import UserRegistered from '#events/user_registered'
 import UserUpdated from '#events/user_updated'
 import UserVerified from '#events/user_verified'
-import User from '#models/user'
+import User, { UserRole } from '#models/user'
 import { UserTokenService } from '#services/user_token_service'
 import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
@@ -44,11 +44,19 @@ export default class UserService {
       }
     })
 
-    await user.save()
+    if (!user.role) user['role'] = UserRole.USER
 
-    UserRegistered.dispatch(user)
+    // Check if the user already exists
+    const existingUser = await User.query().where('email', user.email).first()
+    if (existingUser) {
+      throw new Error('User already exists')
+    }
 
-    return user
+    const savedUser = await user.save()
+
+    UserRegistered.dispatch(savedUser)
+
+    return savedUser
   }
 
   /**
@@ -67,11 +75,11 @@ export default class UserService {
       }
     })
 
-    await user.save()
+    const savedUser = await user.save()
 
-    UserUpdated.dispatch(user)
+    UserUpdated.dispatch(savedUser)
 
-    return user
+    return savedUser
   }
 
   /**
@@ -82,7 +90,7 @@ export default class UserService {
    * @throws Error if user is not found or token is invalid/expired
    */
   async verify(userId: string, token: string): Promise<User> {
-    const user = await User.findOrFail(userId)
+    let user = await User.findOrFail(userId)
 
     // Check if user is already verified
     if (user.verifiedAt) {
@@ -98,7 +106,7 @@ export default class UserService {
     // Set verifiedAt to current timestamp
     user.verifiedAt = DateTime.now()
 
-    await user.save()
+    user = await user.save()
 
     // Delete the used token
     await userTokenService.delete(token)
@@ -110,11 +118,11 @@ export default class UserService {
   }
 
   async updateLastLogin(userId: string): Promise<User> {
-    const user = await User.findOrFail(userId)
+    let user = await User.findOrFail(userId)
 
     user.lastLoginAt = DateTime.now()
 
-    await user.save()
+    user = await user.save()
 
     return user
   }
@@ -159,11 +167,11 @@ export default class UserService {
       throw new Error('Invalid or expired reset token')
     }
 
-    const user = userToken.user
+    let user = userToken.user
 
     // Update the password
     user.password = newPassword
-    await user.save()
+    user = await user.save()
 
     // Delete the used token
     await userTokenService.delete(token)
