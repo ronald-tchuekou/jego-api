@@ -29,7 +29,9 @@
     "#database/*": "./database/*.js",
     "#start/*": "./start/*.js",
     "#tests/*": "./tests/*.js",
-    "#config/*": "./config/*.js"
+    "#config/*": "./config/*.js",
+    "#dtos/*": "./app/dtos/*.js",
+    "#utils/*": "./app/utils/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",
@@ -51,14 +53,18 @@
     "typescript": "~5.8"
   },
   "dependencies": {
+    "@adocasts.com/dto": "^0.0.10",
     "@adonisjs/auth": "^9.4.0",
     "@adonisjs/core": "^6.18.0",
     "@adonisjs/cors": "^2.2.1",
     "@adonisjs/lucid": "^21.6.1",
+    "@adonisjs/mail": "^9.2.2",
     "@vinejs/vine": "^3.0.1",
+    "edge.js": "^6.3.0",
     "luxon": "^3.7.1",
     "pg": "^8.16.3",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "sqids": "^0.3.0"
   },
   "hotHook": {
     "boundaries": [
