@@ -26,6 +26,7 @@ router
         router.post('logout', [AuthController, 'logout']).middleware([middleware.auth()])
         router.post('register', [AuthController, 'register'])
         router.post('login', [AuthController, 'login'])
+        router.post('verify-email', [AuthController, 'verifyEmail'])
         router.post('forgot-password', [AuthController, 'forgotPassword'])
         router.post('reset-password', [AuthController, 'resetPassword'])
       })
@@ -35,6 +36,7 @@ router
       .group(() => {
         router.get('/', [MeController, 'get'])
         router.put('/', [MeController, 'update'])
+        router.get('/revalidate-token', [AuthController, 'revalidateToken'])
       })
       .prefix('me')
       .middleware([middleware.auth()])

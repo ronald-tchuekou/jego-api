@@ -1,12 +1,12 @@
 import Post from '#models/post'
 import User from '#models/user'
-import { BaseModel, column, hasManyThrough } from '@adonisjs/lucid/orm'
-import type { HasManyThrough } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, hasMany, hasManyThrough } from '@adonisjs/lucid/orm'
+import type { HasMany, HasManyThrough } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 
 export default class Company extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
 
   @column()
   declare name: string
@@ -55,4 +55,7 @@ export default class Company extends BaseModel {
 
   @hasManyThrough([() => Post, () => User])
   declare posts: HasManyThrough<typeof Post>
+
+  @hasMany(() => User)
+  declare users: HasMany<typeof User>
 }
