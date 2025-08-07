@@ -181,4 +181,64 @@ export default class UserService {
 
     return user
   }
+
+  /**
+   * Get users with pagination
+   * @param query - The search query
+   * @param page - The page number
+   * @param limit - The number of users per page
+   * @returns The users
+   */
+  async getUsers(query: string = '', page: number = 1, limit: number = 10): Promise<User[]> {
+    let queryBuilder = User.query()
+
+    if (query) {
+      queryBuilder = queryBuilder
+        .where('firstName', 'ilike', `%${query}%`)
+        .orWhere('lastName', 'ilike', `%${query}%`)
+        .orWhere('email', 'ilike', `%${query}%`)
+    }
+
+    const users = await queryBuilder.paginate(page, limit)
+
+    return users
+  }
+
+  async getTotalUsers(query: string = ''): Promise<number> {
+    let queryBuilder = User.query()
+
+    if (query) {
+      queryBuilder = queryBuilder
+        .where('firstName', 'ilike', `%${query}%`)
+        .orWhere('lastName', 'ilike', `%${query}%`)
+        .orWhere('email', 'ilike', `%${query}%`)
+    }
+
+    const total = (await queryBuilder.count('id as total')) as (User & { total: number })[]
+
+    return total[0].total
+  }
+
+  /**
+   * Find a user by ID
+   * @param userId - The ID of the user to find
+   * @returns The user
+   * @throws Error if user is not found
+   */
+  async findById(userId: string): Promise<User> {
+    const user = await User.findOrFail(userId)
+    return user
+  }
+
+  /**
+   * Delete a user by ID
+   * @param userId - The ID of the user to delete
+   * @returns True if deleted successfully
+   * @throws Error if user is not found
+   */
+  async delete(userId: string): Promise<boolean> {
+    const user = await User.findOrFail(userId)
+    await user.delete()
+    return true
+  }
 }
