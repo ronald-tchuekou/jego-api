@@ -12,6 +12,7 @@ import router from '@adonisjs/core/services/router'
 
 const AuthController = () => import('#controllers/auth_controller')
 const MeController = () => import('#controllers/me_controller')
+const UserController = () => import('#controllers/user_controller')
 
 router.get('/', async () => {
   return {
@@ -39,6 +40,12 @@ router
         router.get('/revalidate-token', [AuthController, 'revalidateToken'])
       })
       .prefix('me')
+      .middleware([middleware.auth()])
+
+    router
+      .group(() => {
+        router.resource('users', UserController).apiOnly()
+      })
       .middleware([middleware.auth()])
   })
   .prefix('v1')
