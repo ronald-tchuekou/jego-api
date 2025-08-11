@@ -16,21 +16,27 @@ export default class AuthController {
    * Handle form submission for the edit action
    */
   async login({ request, response }: HttpContext) {
-    const { email, password } = await request.validateUsing(loginValidator)
-    const user = await User.verifyCredentials(email, password)
+    try {
+      const { email, password } = await request.validateUsing(loginValidator)
+      const user = await User.verifyCredentials(email, password)
 
-    const token = await User.accessTokens.create(user, ['*'], {
-      expiresIn: '30d',
-    })
+      const token = await User.accessTokens.create(user, ['*'], {
+        expiresIn: '30d',
+      })
 
-    if (token.value) {
-      UserLoggedIn.dispatch(user)
+      if (token.value) {
+        UserLoggedIn.dispatch(user)
+      }
+
+      return response.ok({
+        token: token.value!.release(),
+        user,
+      })
+    } catch (error) {
+      return response.badRequest({
+        message: 'Votre adresse e-mail ou mot de passe est incorrect.',
+      })
     }
-
-    return response.ok({
-      token: token.value!.release(),
-      user,
-    })
   }
 
   @inject()
@@ -78,6 +84,13 @@ export default class AuthController {
   @inject()
   async forgotPassword({ request, response }: HttpContext, userService: UserService) {
     const { email } = await request.validateUsing(forgotPasswordValidator)
+
+    const user = await userService.findByEmail(email)
+    if (!user) {
+      return response.ok({
+        message: 'If the email exists in our system, you will receive a password reset link',
+      })
+    }
 
     await userService.requestPasswordReset(email)
 

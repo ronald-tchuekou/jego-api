@@ -92,7 +92,7 @@ export default class MeController {
   async verifyNewEmail({ request, response, auth }: HttpContext, userService: UserService) {
     const data = await request.validateUsing(verifyNewEmailValidator)
 
-    const user = await userService.verify(auth.user!.id, data.token)
+    const user = await userService.verifyNewEmail(auth.user!.id, data.token)
 
     user.email = user.updateEmailRequest!
     user.updateEmailRequest = null

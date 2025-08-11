@@ -100,7 +100,7 @@ export default class UserService {
     const userToken = await userTokenService.verify(token, user)
 
     if (!userToken) {
-      throw new Error('Invalid or expired verification token')
+      throw new Error('Token de vérification invalide ou expiré')
     }
 
     // Set verifiedAt to current timestamp
@@ -113,6 +113,23 @@ export default class UserService {
 
     // Dispatch an event for user verification
     UserVerified.dispatch(user)
+
+    return user
+  }
+
+  async verifyNewEmail(userId: string, token: string): Promise<User> {
+    let user = await User.findOrFail(userId)
+
+    if (!user.updateEmailRequest) {
+      throw new Error("Aucune demande de mise à jour d'email trouvée.")
+    }
+
+    const userTokenService = new UserTokenService()
+    const userToken = await userTokenService.verify(token, user)
+
+    if (!userToken) {
+      throw new Error('Votre code de vérification est invalide ou a expiré.')
+    }
 
     return user
   }
