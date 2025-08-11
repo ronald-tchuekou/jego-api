@@ -231,6 +231,17 @@ export default class UserService {
   }
 
   /**
+   * Find a user by email
+   * @param email - The email of the user to find
+   * @returns The user
+   * @throws Error if user is not found
+   */
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await User.query().where('email', email).first()
+    return user
+  }
+
+  /**
    * Delete a user by ID
    * @param userId - The ID of the user to delete
    * @returns True if deleted successfully

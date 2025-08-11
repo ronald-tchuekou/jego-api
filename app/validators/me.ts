@@ -14,3 +14,16 @@ export const updateMeValidator = vine.compile(
     passwordConfirm: vine.string().sameAs('password').optional().requiredIfExists('password'),
   })
 )
+
+export const updateMeEmailValidator = vine.compile(
+  vine.object({
+    password: vine.string(),
+    email: vine.string().email(),
+  })
+)
+
+export const verifyNewEmailValidator = vine.compile(
+  vine.object({
+    token: vine.string(),
+  })
+)

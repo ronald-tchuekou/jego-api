@@ -19,7 +19,9 @@ export default class AuthController {
     const { email, password } = await request.validateUsing(loginValidator)
     const user = await User.verifyCredentials(email, password)
 
-    const token = await User.accessTokens.create(user)
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30d',
+    })
 
     if (token.value) {
       UserLoggedIn.dispatch(user)
@@ -36,7 +38,9 @@ export default class AuthController {
     const data = await request.validateUsing(registerValidator)
     const user = await userService.create(data)
 
-    const token = await User.accessTokens.create(user)
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30d',
+    })
 
     UserLoggedIn.dispatch(user)
 
@@ -58,9 +62,13 @@ export default class AuthController {
 
   async revalidateToken({ auth, response }: HttpContext) {
     const user = auth.use('api').getUserOrFail()
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30d',
+    })
+
     return response.ok({
       user,
-      token: user.currentAccessToken.value?.release,
+      token: token.value!.release(),
     })
   }
 
@@ -87,7 +95,9 @@ export default class AuthController {
 
     const user = await userService.resetPassword(data.token, data.password)
 
-    const token = await User.accessTokens.create(user)
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30d',
+    })
 
     return response.ok({
       message: 'Password has been reset successfully',
@@ -102,7 +112,9 @@ export default class AuthController {
 
     const user = await userService.verify(userId, token)
 
-    const accessToken = await User.accessTokens.create(user)
+    const accessToken = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30d',
+    })
 
     return response.ok({
       message: 'Email has been verified successfully',
