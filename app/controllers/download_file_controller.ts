@@ -4,7 +4,7 @@ import { sep } from 'node:path'
 export default class DownloadFileController {
   async download({ response, request }: HttpContext) {
     const filePath = request.param('*').join(sep)
-    const absolutePath = `storage/uploads/${filePath}`
+    const absolutePath = `storage/${filePath}`
     return response.download(absolutePath, true)
   }
 }

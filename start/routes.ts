@@ -55,6 +55,6 @@ router
       })
       .middleware([middleware.auth()])
 
-    router.get('/uploads/*', [DownloadFileController, 'download'])
+    router.get('/storage/*', [DownloadFileController, 'download'])
   })
   .prefix('v1')
