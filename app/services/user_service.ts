@@ -100,7 +100,7 @@ export default class UserService {
     const userToken = await userTokenService.verify(token, user)
 
     if (!userToken) {
-      throw new Error('Invalid or expired verification token')
+      throw new Error('Token de vérification invalide ou expiré')
     }
 
     // Set verifiedAt to current timestamp
@@ -113,6 +113,23 @@ export default class UserService {
 
     // Dispatch an event for user verification
     UserVerified.dispatch(user)
+
+    return user
+  }
+
+  async verifyNewEmail(userId: string, token: string): Promise<User> {
+    let user = await User.findOrFail(userId)
+
+    if (!user.updateEmailRequest) {
+      throw new Error("Aucune demande de mise à jour d'email trouvée.")
+    }
+
+    const userTokenService = new UserTokenService()
+    const userToken = await userTokenService.verify(token, user)
+
+    if (!userToken) {
+      throw new Error('Votre code de vérification est invalide ou a expiré.')
+    }
 
     return user
   }
@@ -180,5 +197,76 @@ export default class UserService {
     UserPasswordReset.dispatch(user)
 
     return user
+  }
+
+  /**
+   * Get users with pagination
+   * @param query - The search query
+   * @param page - The page number
+   * @param limit - The number of users per page
+   * @returns The users
+   */
+  async getUsers(query: string = '', page: number = 1, limit: number = 10): Promise<User[]> {
+    let queryBuilder = User.query()
+
+    if (query) {
+      queryBuilder = queryBuilder
+        .where('firstName', 'ilike', `%${query}%`)
+        .orWhere('lastName', 'ilike', `%${query}%`)
+        .orWhere('email', 'ilike', `%${query}%`)
+    }
+
+    const users = await queryBuilder.paginate(page, limit)
+
+    return users
+  }
+
+  async getTotalUsers(query: string = ''): Promise<number> {
+    let queryBuilder = User.query()
+
+    if (query) {
+      queryBuilder = queryBuilder
+        .where('firstName', 'ilike', `%${query}%`)
+        .orWhere('lastName', 'ilike', `%${query}%`)
+        .orWhere('email', 'ilike', `%${query}%`)
+    }
+
+    const total = (await queryBuilder.count('id as total')) as (User & { total: number })[]
+
+    return total[0].total
+  }
+
+  /**
+   * Find a user by ID
+   * @param userId - The ID of the user to find
+   * @returns The user
+   * @throws Error if user is not found
+   */
+  async findById(userId: string): Promise<User> {
+    const user = await User.findOrFail(userId)
+    return user
+  }
+
+  /**
+   * Find a user by email
+   * @param email - The email of the user to find
+   * @returns The user
+   * @throws Error if user is not found
+   */
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await User.query().where('email', email).first()
+    return user
+  }
+
+  /**
+   * Delete a user by ID
+   * @param userId - The ID of the user to delete
+   * @returns True if deleted successfully
+   * @throws Error if user is not found
+   */
+  async delete(userId: string): Promise<boolean> {
+    const user = await User.findOrFail(userId)
+    await user.delete()
+    return true
   }
 }

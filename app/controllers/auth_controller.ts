@@ -16,19 +16,27 @@ export default class AuthController {
    * Handle form submission for the edit action
    */
   async login({ request, response }: HttpContext) {
-    const { email, password } = await request.validateUsing(loginValidator)
-    const user = await User.verifyCredentials(email, password)
+    try {
+      const { email, password } = await request.validateUsing(loginValidator)
+      const user = await User.verifyCredentials(email, password)
 
-    const token = await User.accessTokens.create(user)
+      const token = await User.accessTokens.create(user, ['*'], {
+        expiresIn: '30d',
+      })
 
-    if (token.value) {
-      UserLoggedIn.dispatch(user)
+      if (token.value) {
+        UserLoggedIn.dispatch(user)
+      }
+
+      return response.ok({
+        token: token.value!.release(),
+        user,
+      })
+    } catch (error) {
+      return response.badRequest({
+        message: 'Votre adresse e-mail ou mot de passe est incorrect.',
+      })
     }
-
-    return response.ok({
-      token: token.value!.release(),
-      user,
-    })
   }
 
   @inject()
@@ -36,7 +44,9 @@ export default class AuthController {
     const data = await request.validateUsing(registerValidator)
     const user = await userService.create(data)
 
-    const token = await User.accessTokens.create(user)
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30d',
+    })
 
     UserLoggedIn.dispatch(user)
 
@@ -58,9 +68,13 @@ export default class AuthController {
 
   async revalidateToken({ auth, response }: HttpContext) {
     const user = auth.use('api').getUserOrFail()
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30d',
+    })
+
     return response.ok({
       user,
-      token: user.currentAccessToken.value?.release,
+      token: token.value!.release(),
     })
   }
 
@@ -70,6 +84,13 @@ export default class AuthController {
   @inject()
   async forgotPassword({ request, response }: HttpContext, userService: UserService) {
     const { email } = await request.validateUsing(forgotPasswordValidator)
+
+    const user = await userService.findByEmail(email)
+    if (!user) {
+      return response.ok({
+        message: 'If the email exists in our system, you will receive a password reset link',
+      })
+    }
 
     await userService.requestPasswordReset(email)
 
@@ -87,7 +108,9 @@ export default class AuthController {
 
     const user = await userService.resetPassword(data.token, data.password)
 
-    const token = await User.accessTokens.create(user)
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30d',
+    })
 
     return response.ok({
       message: 'Password has been reset successfully',
@@ -102,7 +125,9 @@ export default class AuthController {
 
     const user = await userService.verify(userId, token)
 
-    const accessToken = await User.accessTokens.create(user)
+    const accessToken = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30d',
+    })
 
     return response.ok({
       message: 'Email has been verified successfully',
