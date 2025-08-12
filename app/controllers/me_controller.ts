@@ -4,15 +4,14 @@ import UserService from '#services/user_service'
 import { UserTokenService } from '#services/user_token_service'
 import {
   deleteAccountValidator,
+  imageProfileValidator,
   updateMeEmailValidator,
   updateMePasswordValidator,
   updateMeValidator,
   verifyNewEmailValidator,
 } from '#validators/me'
 import { inject } from '@adonisjs/core'
-import { cuid } from '@adonisjs/core/helpers'
 import type { HttpContext } from '@adonisjs/core/http'
-import app from '@adonisjs/core/services/app'
 
 export const USER_PROFILE_STORAGE_PATH = 'uploads/profile_images'
 
@@ -47,14 +46,17 @@ export default class MeController {
 
   @inject()
   async uploadImageProfile({ request, response, auth }: HttpContext, userService: UserService) {
-    const image = request.file('image')
+    const { image } = await request.validateUsing(imageProfileValidator)
 
     if (!image) {
-      return response.badRequest('Image is required')
+      return response.badRequest('Une image est requise.')
     }
 
-    const filename = `${Date.now()}_${cuid()}.${image.extname}`
-    await image.move(app.makePath(`storage/${USER_PROFILE_STORAGE_PATH}`), { name: filename })
+    const filename = `${auth.user!.id}_avatar.${image.extname}`
+    await image.move(`storage/${USER_PROFILE_STORAGE_PATH}`, {
+      name: filename,
+      overwrite: true,
+    })
 
     const user = await userService.update(auth.user!.id, {
       profileImage: `${USER_PROFILE_STORAGE_PATH}/${filename}`,

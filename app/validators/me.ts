@@ -41,3 +41,12 @@ export const deleteAccountValidator = vine.compile(
     password: vine.string(),
   })
 )
+
+export const imageProfileValidator = vine.compile(
+  vine.object({
+    image: vine.file({
+      size: '2mb',
+      extnames: ['jpg', 'png', 'jpeg', 'webp'],
+    }),
+  })
+)
