@@ -13,7 +13,7 @@ import {
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
-export const USER_PROFILE_STORAGE_PATH = 'uploads/profile_images'
+export const USER_PROFILE_STORAGE_PATH = 'storage/uploads/profile_images'
 
 export default class MeController {
   async get({ auth, response }: HttpContext) {
@@ -53,7 +53,7 @@ export default class MeController {
     }
 
     const filename = `${auth.user!.id}_avatar.${image.extname}`
-    await image.move(`storage/${USER_PROFILE_STORAGE_PATH}`, {
+    await image.move(USER_PROFILE_STORAGE_PATH, {
       name: filename,
       overwrite: true,
     })
