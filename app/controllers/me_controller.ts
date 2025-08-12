@@ -45,7 +45,7 @@ export default class MeController {
   }
 
   @inject()
-  async uploadImageProfile({ request, response, auth }: HttpContext, userService: UserService) {
+  async uploadImageProfile({ request, response, auth }: HttpContext) {
     const { image } = await request.validateUsing(imageProfileValidator)
 
     if (!image) {
@@ -58,9 +58,10 @@ export default class MeController {
       overwrite: true,
     })
 
-    const user = await userService.update(auth.user!.id, {
-      profileImage: `${USER_PROFILE_STORAGE_PATH}/${filename}`,
-    })
+    const user = auth.user!
+
+    user.profileImage = `${USER_PROFILE_STORAGE_PATH}/${filename}`
+    await user.save()
 
     return response.ok({
       user,
