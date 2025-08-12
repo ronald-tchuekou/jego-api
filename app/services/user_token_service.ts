@@ -1,8 +1,10 @@
 import User from '#models/user'
 import UserToken from '#models/user_token'
 import { TokenUtil } from '#utils/token_util'
+import { inject } from '@adonisjs/core'
 import { DateTime, DurationLike } from 'luxon'
 
+@inject()
 export class UserTokenService {
   public async generateNumeric(
     user: User,

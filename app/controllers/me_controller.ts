@@ -1,7 +1,14 @@
 import UserPasswordChanged from '#events/user_password_changed'
 import UserUpdateEmailRequested from '#events/user_update_email_requested'
 import UserService from '#services/user_service'
-import { updateMeEmailValidator, updateMeValidator, verifyNewEmailValidator } from '#validators/me'
+import { UserTokenService } from '#services/user_token_service'
+import {
+  deleteAccountValidator,
+  updateMeEmailValidator,
+  updateMePasswordValidator,
+  updateMeValidator,
+  verifyNewEmailValidator,
+} from '#validators/me'
 import { inject } from '@adonisjs/core'
 import { cuid } from '@adonisjs/core/helpers'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -88,8 +95,21 @@ export default class MeController {
     })
   }
 
+  async resendVerificationEmail({ response, auth }: HttpContext) {
+    UserUpdateEmailRequested.dispatch(auth.user!)
+
+    return response.ok({
+      user: auth.user,
+      message: 'Email de vérification envoyé',
+    })
+  }
+
   @inject()
-  async verifyNewEmail({ request, response, auth }: HttpContext, userService: UserService) {
+  async verifyNewEmail(
+    { request, response, auth }: HttpContext,
+    userService: UserService,
+    userTokenService: UserTokenService
+  ) {
     const data = await request.validateUsing(verifyNewEmailValidator)
 
     const user = await userService.verifyNewEmail(auth.user!.id, data.token)
@@ -98,9 +118,65 @@ export default class MeController {
     user.updateEmailRequest = null
     await user.save()
 
+    // Delete the used token
+    await userTokenService.delete(data.token)
+
     return response.ok({
       user,
       message: 'Email mis à jour',
+    })
+  }
+
+  @inject()
+  async updatePassword({ request, response, auth }: HttpContext, userService: UserService) {
+    const data = await request.validateUsing(updateMePasswordValidator)
+
+    const userToUpdate = await userService.findById(auth.user!.id)
+    if (!userToUpdate) {
+      return response.badRequest('Utilisateur non trouvé')
+    }
+
+    const isPasswordValid = await userToUpdate.verifyPassword(data.currentPassword)
+    if (!isPasswordValid) {
+      return response.badRequest('Mot de passe incorrect')
+    }
+
+    userToUpdate.password = data.newPassword
+    await userToUpdate.save()
+
+    UserPasswordChanged.dispatch(userToUpdate)
+
+    return response.ok({
+      user: userToUpdate,
+      message: 'Mot de passe mis à jour',
+    })
+  }
+
+  @inject()
+  async deleteAccount({ response, request, auth }: HttpContext, userService: UserService) {
+    const data = await request.validateUsing(deleteAccountValidator)
+
+    const user = await userService.findById(auth.user!.id)
+
+    if (!user) {
+      return response.badRequest('Utilisateur non trouvé')
+    }
+
+    const isPasswordValid = await user.verifyPassword(data.password)
+    if (!isPasswordValid) {
+      return response.badRequest('Mot de passe incorrect')
+    }
+
+    user.firstName = 'Supprimé'
+    user.lastName = 'Supprimé'
+    user.email = `${new Date().getTime()}@supprime.com`
+    user.phone = 'Supprimé'
+    user.profileImage = null
+    user.password = ''
+    await user.save()
+
+    return response.ok({
+      user,
     })
   }
 }

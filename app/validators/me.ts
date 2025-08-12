@@ -27,3 +27,17 @@ export const verifyNewEmailValidator = vine.compile(
     token: vine.string(),
   })
 )
+
+export const updateMePasswordValidator = vine.compile(
+  vine.object({
+    currentPassword: vine.string(),
+    newPassword: vine.string(),
+    confirmNewPassword: vine.string().sameAs('newPassword'),
+  })
+)
+
+export const deleteAccountValidator = vine.compile(
+  vine.object({
+    password: vine.string(),
+  })
+)
