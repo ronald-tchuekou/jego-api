@@ -52,6 +52,7 @@ router
     router
       .group(() => {
         router.resource('/users', UserController).apiOnly()
+        router.patch('/users/:id/toggle-block', [UserController, 'toggleBlockUser'])
       })
       .middleware([middleware.auth()])
 

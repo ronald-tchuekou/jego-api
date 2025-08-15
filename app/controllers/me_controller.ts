@@ -31,13 +31,20 @@ export default class MeController {
     })
   }
 
-  @inject()
-  async update({ response, request, auth }: HttpContext, userService: UserService) {
+  async update({ response, request, auth }: HttpContext) {
+    const user = auth.user!
     const data = await request.validateUsing(updateMeValidator)
 
-    const user = await userService.update(auth.user!.id, data)
+    if (data.firstName) user.firstName = data.firstName
+    if (data.lastName) user.lastName = data.lastName
+    if (data.phone) user.phone = data.phone
+    if (data.address) user.address = data.address
+    if (data.city) user.city = data.city
+    if (data.state) user.state = data.state
+    if (data.zipCode) user.zipCode = data.zipCode
+    if (data.country) user.country = data.country
 
-    if (data.password !== undefined) UserPasswordChanged.dispatch(user)
+    await user.save()
 
     return response.ok({
       user,
@@ -61,6 +68,7 @@ export default class MeController {
     const user = auth.user!
 
     user.profileImage = `${USER_PROFILE_STORAGE_PATH}/${filename}`
+
     await user.save()
 
     return response.ok({
@@ -78,22 +86,20 @@ export default class MeController {
       return response.badRequest('Cette adresse e-mail est déjà utilisée.')
     }
 
-    const userToUpdate = await userService.findById(auth.user!.id)
-    if (!userToUpdate) {
-      return response.badRequest('Utilisateur non trouvé')
-    }
-    const isPasswordValid = await userToUpdate.verifyPassword(data.password)
+    const user = auth.user!
+    const isPasswordValid = await user.verifyPassword(data.password)
     if (!isPasswordValid) {
       return response.badRequest('Mot de passe incorrect')
     }
 
-    userToUpdate.updateEmailRequest = data.email
-    await userToUpdate.save()
+    user.updateEmailRequest = data.email
 
-    UserUpdateEmailRequested.dispatch(userToUpdate)
+    await user.save()
+
+    UserUpdateEmailRequested.dispatch(user)
 
     return response.ok({
-      user: userToUpdate,
+      user,
       message: 'Email de mise à jour demandée',
     })
   }
@@ -119,6 +125,7 @@ export default class MeController {
 
     user.email = user.updateEmailRequest!
     user.updateEmailRequest = null
+
     await user.save()
 
     // Delete the used token
@@ -130,40 +137,32 @@ export default class MeController {
     })
   }
 
-  @inject()
-  async updatePassword({ request, response, auth }: HttpContext, userService: UserService) {
+  async updatePassword({ request, response, auth }: HttpContext) {
     const data = await request.validateUsing(updateMePasswordValidator)
 
-    const userToUpdate = await userService.findById(auth.user!.id)
-    if (!userToUpdate) {
-      return response.badRequest('Utilisateur non trouvé')
-    }
+    const user = auth.user!
 
-    const isPasswordValid = await userToUpdate.verifyPassword(data.currentPassword)
+    const isPasswordValid = await user.verifyPassword(data.currentPassword)
     if (!isPasswordValid) {
       return response.badRequest('Mot de passe incorrect')
     }
 
-    userToUpdate.password = data.newPassword
-    await userToUpdate.save()
+    user.password = data.newPassword
 
-    UserPasswordChanged.dispatch(userToUpdate)
+    await user.save()
+
+    UserPasswordChanged.dispatch(user)
 
     return response.ok({
-      user: userToUpdate,
+      user,
       message: 'Mot de passe mis à jour',
     })
   }
 
-  @inject()
-  async deleteAccount({ response, request, auth }: HttpContext, userService: UserService) {
+  async deleteAccount({ response, request, auth }: HttpContext) {
     const data = await request.validateUsing(deleteAccountValidator)
 
-    const user = await userService.findById(auth.user!.id)
-
-    if (!user) {
-      return response.badRequest('Utilisateur non trouvé')
-    }
+    const user = auth.user!
 
     const isPasswordValid = await user.verifyPassword(data.password)
     if (!isPasswordValid) {
@@ -176,6 +175,7 @@ export default class MeController {
     user.phone = 'Supprimé'
     user.profileImage = null
     user.password = ''
+
     await user.save()
 
     return response.ok({
