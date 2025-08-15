@@ -1,16 +1,6 @@
 import { UserRole } from '#models/user'
 import vine from '@vinejs/vine'
 
-export const getUsersValidator = vine.compile(
-  vine.object({
-    params: vine.object({
-      query: vine.string().optional(),
-      page: vine.number().min(1).optional(),
-      limit: vine.number().min(1).max(50).optional(),
-    }),
-  })
-)
-
 export const storeUserValidator = vine.compile(
   vine.object({
     firstName: vine.string().trim().minLength(1),
