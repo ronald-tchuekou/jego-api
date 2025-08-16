@@ -181,7 +181,7 @@ export default class UserService {
     const userToken = await userTokenService.findTokenWithUser(token)
 
     if (!userToken) {
-      throw new Error('Invalid or expired reset token')
+      throw new Error('Le token est invalide ou à expiré.')
     }
 
     let user = userToken.user

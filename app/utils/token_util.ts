@@ -24,13 +24,33 @@ export class TokenUtil {
     }
 
     if (user.role === UserRole.COMPANY_ADMIN) {
-      return ['company:read', 'post:read', 'post:edit', 'post:create', 'post:delete']
+      return [
+        'company:read',
+        'company:create',
+        'company:update',
+        'company:delete',
+        'company-image:update',
+        'company-image:delete',
+        'post:read',
+        'post:edit',
+        'post:create',
+        'post:delete',
+      ]
     }
 
     if (user.role === UserRole.COMPANY_AGENT) {
-      return ['company:read', 'post:read', 'post:edit', 'post:create', 'post:delete']
+      return [
+        'company:read',
+        'company:update',
+        'company-image:update',
+        'company-image:delete',
+        'post:read',
+        'post:edit',
+        'post:create',
+        'post:delete',
+      ]
     }
 
-    return ['company:read', 'post:read', 'post:edit']
+    return ['company:read', 'post:read']
   }
 }

@@ -1,4 +1,5 @@
 import Category from '#models/category'
+import CompanyImage from '#models/company_image'
 import Post from '#models/post'
 import User from '#models/user'
 import { BaseModel, belongsTo, column, hasMany, hasManyThrough } from '@adonisjs/lucid/orm'
@@ -83,6 +84,9 @@ export default class Company extends BaseModel {
 
   @hasMany(() => User)
   declare users: HasMany<typeof User>
+
+  @hasMany(() => CompanyImage)
+  declare images: HasMany<typeof CompanyImage>
 
   @belongsTo(() => Category)
   declare category: BelongsTo<typeof Category>

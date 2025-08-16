@@ -14,6 +14,7 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export const USER_PROFILE_STORAGE_PATH = 'storage/uploads/profile_images'
+export const COMPANY_IMAGES_STORAGE_PATH = 'storage/uploads/company_images'
 
 export default class MeController {
   async get({ auth, response }: HttpContext) {

@@ -16,6 +16,7 @@ const UserController = () => import('#controllers/user_controller')
 const DownloadFileController = () => import('#controllers/download_file_controller')
 const CategoriesController = () => import('#controllers/categories_controller')
 const CompaniesController = () => import('#controllers/companies_controller')
+const CompanyImagesController = () => import('#controllers/company_images_controller')
 
 router.get('', async () => {
   return {
@@ -108,6 +109,22 @@ router
         router.post('', [CompaniesController, 'store'])
       })
       .prefix('companies')
+
+    // Company Images routes
+    router
+      .group(() => {
+        // Protected
+        router
+          .group(() => {
+            router.post('', [CompanyImagesController, 'store'])
+            router.delete(':imageId', [CompanyImagesController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+
+        // Public
+        router.get(':companyId', [CompanyImagesController, 'index'])
+      })
+      .prefix('company-images')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })

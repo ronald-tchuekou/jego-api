@@ -142,7 +142,7 @@ export default class CompanyService {
    * @throws Error if company is not found
    */
   async findById(companyId: string): Promise<Company> {
-    return Company.findOrFail(companyId)
+    return Company.findByOrFail('id', companyId)
   }
 
   /**
