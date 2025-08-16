@@ -17,6 +17,7 @@ const DownloadFileController = () => import('#controllers/download_file_controll
 const CategoriesController = () => import('#controllers/categories_controller')
 const CompaniesController = () => import('#controllers/companies_controller')
 const CompanyImagesController = () => import('#controllers/company_images_controller')
+const CompanyReviewsController = () => import('#controllers/company_reviews_controller')
 
 router.get('', async () => {
   return {
@@ -125,6 +126,26 @@ router
         router.get(':companyId', [CompanyImagesController, 'index'])
       })
       .prefix('company-images')
+
+    // Company Reviews routes
+    router
+      .group(() => {
+        // Protected
+        router
+          .group(() => {
+            router.post('', [CompanyReviewsController, 'store'])
+            router.put(':id', [CompanyReviewsController, 'update'])
+            router.delete(':id', [CompanyReviewsController, 'destroy'])
+            router.patch(':id/toggle-approval', [CompanyReviewsController, 'toggleApproval'])
+          })
+          .middleware([middleware.auth()])
+
+        // Public
+        router.get(':companyId', [CompanyReviewsController, 'index'])
+        router.get(':id', [CompanyReviewsController, 'show'])
+        router.get(':companyId/stats', [CompanyReviewsController, 'getCompanyStats'])
+      })
+      .prefix('company-reviews')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })
