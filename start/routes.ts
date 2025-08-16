@@ -15,6 +15,7 @@ const MeController = () => import('#controllers/me_controller')
 const UserController = () => import('#controllers/user_controller')
 const DownloadFileController = () => import('#controllers/download_file_controller')
 const CategoriesController = () => import('#controllers/categories_controller')
+const CompaniesController = () => import('#controllers/companies_controller')
 
 router.get('', async () => {
   return {
@@ -88,6 +89,25 @@ router
         router.get(':id', [CategoriesController, 'show'])
       })
       .prefix('categories')
+
+    // Companies routes
+    router
+      .group(() => {
+        // Protected
+        router
+          .group(() => {
+            router.put(':id', [CompaniesController, 'update'])
+            router.delete(':id', [CompaniesController, 'destroy'])
+            router.patch(':id/toggle-block', [CompaniesController, 'toggleBlockedStatus'])
+          })
+          .middleware([middleware.auth()])
+
+        // Public
+        router.get(':id', [CompaniesController, 'show'])
+        router.get('', [CompaniesController, 'index'])
+        router.post('', [CompaniesController, 'store'])
+      })
+      .prefix('companies')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })

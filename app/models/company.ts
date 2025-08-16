@@ -10,7 +10,7 @@ export default class Company extends BaseModel {
   declare id: string
 
   @column()
-  declare category_id: string | null
+  declare categoryId: string | null
 
   @column()
   declare name: string
@@ -31,7 +31,7 @@ export default class Company extends BaseModel {
   declare state: string | null
 
   @column()
-  declare zip_code: string | null
+  declare zipCode: string | null
 
   @column()
   declare country: string | null
@@ -40,16 +40,37 @@ export default class Company extends BaseModel {
   declare website: string | null
 
   @column()
+  declare facebook: string | null
+
+  @column()
+  declare instagram: string | null
+
+  @column()
+  declare twitter: string | null
+
+  @column()
+  declare linkedin: string | null
+
+  @column()
+  declare youtube: string | null
+
+  @column()
+  declare tiktok: string | null
+
+  @column()
   declare logo: string | null
+
+  @column()
+  declare bannerImage: string | null
 
   @column()
   declare description: string | null
 
   @column()
-  declare verified_at: DateTime | null
+  declare verifiedAt: DateTime | null
 
   @column()
-  declare blocked_at: DateTime | null
+  declare blockedAt: DateTime | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
