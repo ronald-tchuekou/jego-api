@@ -47,12 +47,3 @@ export const updateCompanyValidator = vine.compile(
     description: vine.string().trim().optional(),
   })
 )
-
-export const getCompaniesValidator = vine.compile(
-  vine.object({
-    search: vine.string().optional(),
-    page: vine.number().min(1).optional(),
-    limit: vine.number().min(1).max(50).optional(),
-    categoryId: vine.string().trim().optional(),
-  })
-)

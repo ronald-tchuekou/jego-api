@@ -1,10 +1,6 @@
 import { blockCompany, deleteCompany, updateCompany } from '#abilities/company_abilities'
 import CompanyService from '#services/company_service'
-import {
-  getCompaniesValidator,
-  storeCompanyValidator,
-  updateCompanyValidator,
-} from '#validators/company'
+import { storeCompanyValidator, updateCompanyValidator } from '#validators/company'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -17,8 +13,14 @@ export default class CompaniesController {
    */
   async index({ request, response }: HttpContext) {
     try {
-      const filters = await request.validateUsing(getCompaniesValidator)
-      const companies = await this.companyService.getAll(filters)
+      const { page = 1, limit = 10, search = '', categoryId, status } = request.qs()
+      const companies = await this.companyService.getAll({
+        page,
+        limit,
+        search,
+        categoryId,
+        status,
+      })
 
       return response.ok(companies)
     } catch (error) {
@@ -67,6 +69,13 @@ export default class CompaniesController {
   async update({ params, request, bouncer, response }: HttpContext) {
     try {
       const company = await this.companyService.findById(params.id)
+
+      if (!company) {
+        return response.notFound({
+          message: 'Aucune entreprise trouvée.',
+        })
+      }
+
       await bouncer.authorize(updateCompany, company)
 
       const companyData = await request.validateUsing(updateCompanyValidator)
@@ -86,6 +95,12 @@ export default class CompaniesController {
   async destroy({ params, bouncer, response }: HttpContext) {
     try {
       const company = await this.companyService.findById(params.id)
+
+      if (!company) {
+        return response.notFound({
+          message: 'Aucune entreprise trouvée.',
+        })
+      }
       await bouncer.authorize(deleteCompany, company)
 
       await this.companyService.delete(params.id)

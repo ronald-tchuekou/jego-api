@@ -4,7 +4,8 @@ import CompanyService from '#services/company_service'
 import { storeCompanyImagesValidator } from '#validators/company_image'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import { COMPANY_IMAGES_STORAGE_PATH } from './me_controller.js'
+
+export const COMPANY_IMAGES_STORAGE_PATH = 'storage/uploads/company_images'
 
 @inject()
 export default class CompanyImagesController {

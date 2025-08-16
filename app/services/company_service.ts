@@ -89,19 +89,33 @@ export default class CompanyService {
     page?: number
     limit?: number
     categoryId?: string
+    status?: 'blocked' | 'active'
   }): Promise<Company[]> {
-    const { search = '', page = 1, limit = 10 } = filters
+    const { search = '', page = 1, limit = 10, categoryId, status } = filters
 
-    let queryBuilder = Company.query().where((query) => {
-      query.whereILike('name', `%${search}%`)
-      query.orWhereILike('description', `%${search}%`)
-      query.orWhereILike('email', `%${search}%`)
-      query.orWhereILike('phone', `%${search}%`)
-      query.orWhereILike('city', `%${search}%`)
-    })
+    let queryBuilder = Company.query()
+      .where((query) => {
+        query.whereILike('name', `%${search}%`)
+        query.orWhereILike('description', `%${search}%`)
+        query.orWhereILike('email', `%${search}%`)
+        query.orWhereILike('phone', `%${search}%`)
+        query.orWhereILike('city', `%${search}%`)
+      })
+      .preload('category')
+      .preload('appointmentRequests')
+      .preload('reviews')
+      .preload('services')
+      .preload('images')
+      .preload('docs')
+      .preload('posts')
 
-    if (filters.categoryId) {
-      queryBuilder = queryBuilder.andWhere('categoryId', filters.categoryId)
+    if (categoryId) {
+      queryBuilder = queryBuilder.andWhere('categoryId', categoryId)
+    }
+
+    if (status) {
+      if (status === 'blocked') queryBuilder = queryBuilder.andWhereNotNull('blockedAt')
+      if (status === 'active') queryBuilder = queryBuilder.andWhereNull('blockedAt')
     }
 
     const companies = await queryBuilder
@@ -141,8 +155,17 @@ export default class CompanyService {
    * @returns The company
    * @throws Error if company is not found
    */
-  async findById(companyId: string): Promise<Company> {
-    return Company.findByOrFail('id', companyId)
+  async findById(companyId: string): Promise<Company | null> {
+    return Company.query()
+      .where('id', companyId)
+      .preload('category')
+      .preload('appointmentRequests')
+      .preload('reviews')
+      .preload('services')
+      .preload('images')
+      .preload('docs')
+      .preload('posts')
+      .first()
   }
 
   /**
@@ -152,7 +175,16 @@ export default class CompanyService {
    * @throws Error if company is not found
    */
   async findByEmail(email: string): Promise<Company | null> {
-    return Company.query().where('email', email).first()
+    return Company.query()
+      .where('email', email)
+      .preload('category')
+      .preload('appointmentRequests')
+      .preload('reviews')
+      .preload('services')
+      .preload('images')
+      .preload('docs')
+      .preload('posts')
+      .first()
   }
 
   /**

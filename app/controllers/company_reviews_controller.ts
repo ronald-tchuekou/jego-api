@@ -1,12 +1,12 @@
 import {
-   createCompanyReview,
-   deleteCompanyReview,
-   updateCompanyReview,
+  createCompanyReview,
+  deleteCompanyReview,
+  updateCompanyReview,
 } from '#abilities/company_review_abilities'
 import CompanyReviewService from '#services/company_review_service'
 import {
-   storeCompanyReviewValidator,
-   updateCompanyReviewValidator,
+  storeCompanyReviewValidator,
+  updateCompanyReviewValidator,
 } from '#validators/company_review'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'

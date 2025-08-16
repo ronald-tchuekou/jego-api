@@ -216,11 +216,14 @@ export default class UserService {
   }): Promise<User[]> {
     const { search = '', page = 1, limit = 10, companyId = '', role, status } = filters
 
-    let queryBuilder = User.query().where((query) => {
-      query.whereILike('firstName', `%${search}%`)
-      query.orWhereILike('lastName', `%${search}%`)
-      query.orWhereILike('email', `%${search}%`)
-    })
+    let queryBuilder = User.query()
+      .where((query) => {
+        query.whereILike('firstName', `%${search}%`)
+        query.orWhereILike('lastName', `%${search}%`)
+        query.orWhereILike('email', `%${search}%`)
+      })
+      .preload('company')
+      .preload('posts')
 
     if (companyId) queryBuilder = queryBuilder.andWhere('companyId', companyId)
 
@@ -261,8 +264,8 @@ export default class UserService {
    * @returns The user
    * @throws Error if user is not found
    */
-  async findById(userId: string): Promise<User> {
-    const user = await User.findOrFail(userId)
+  async findById(userId: string): Promise<User | null> {
+    const user = await User.query().preload('company').preload('posts').where('id', userId).first()
     return user
   }
 
@@ -273,7 +276,11 @@ export default class UserService {
    * @throws Error if user is not found
    */
   async findByEmail(email: string): Promise<User | null> {
-    const user = await User.query().where('email', email).first()
+    const user = await User.query()
+      .preload('company')
+      .preload('posts')
+      .where('email', email)
+      .first()
     return user
   }
 
