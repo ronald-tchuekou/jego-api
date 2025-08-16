@@ -5,6 +5,10 @@ import User from '#models/user'
 import { BaseModel, belongsTo, column, hasMany, hasManyThrough } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany, HasManyThrough } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import CompanyAppointmentRequest from './company_appointment_request.js'
+import CompanyDoc from './company_doc.js'
+import CompanyReview from './company_review.js'
+import CompanyService from './company_service.js'
 
 export default class Company extends BaseModel {
   @column({ isPrimary: true })
@@ -90,4 +94,16 @@ export default class Company extends BaseModel {
 
   @belongsTo(() => Category)
   declare category: BelongsTo<typeof Category>
+
+  @hasMany(() => CompanyDoc)
+  declare docs: HasMany<typeof CompanyDoc>
+
+  @hasMany(() => CompanyService)
+  declare services: HasMany<typeof CompanyService>
+
+  @hasMany(() => CompanyReview)
+  declare reviews: HasMany<typeof CompanyReview>
+
+  @hasMany(() => CompanyAppointmentRequest)
+  declare appointmentRequests: HasMany<typeof CompanyAppointmentRequest>
 }
