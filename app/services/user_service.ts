@@ -239,14 +239,15 @@ export default class UserService {
     return users
   }
 
-  async getTotalUsers(query: string = ''): Promise<number> {
+  async getTotalUsers(search: string = ''): Promise<number> {
     let queryBuilder = User.query()
 
-    if (query) {
-      queryBuilder = queryBuilder
-        .where('firstName', 'ilike', `%${query}%`)
-        .orWhere('lastName', 'ilike', `%${query}%`)
-        .orWhere('email', 'ilike', `%${query}%`)
+    if (search) {
+      queryBuilder = queryBuilder.where((query) => {
+        query.whereILike('firstName', `%${search}%`)
+        query.orWhereILike('lastName', `%${search}%`)
+        query.orWhereILike('email', `%${search}%`)
+      })
     }
 
     const total = (await queryBuilder.count('id as total')) as (User & { total: number })[]
