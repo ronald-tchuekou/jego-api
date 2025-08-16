@@ -51,6 +51,12 @@ export default class CompanyImagesController {
 
       // Get company and verify access
       const company = await this.companyService.findById(companyId)
+      if (!company) {
+        return response.notFound({
+          message: 'Aucune entreprise trouvée.',
+        })
+      }
+
       await bouncer.authorize(createCompanyImages, company)
 
       for (const image of images) {
@@ -90,6 +96,12 @@ export default class CompanyImagesController {
 
       // Get company and verify access
       const company = await this.companyService.findById(auth.user!.companyId || '')
+      if (!company) {
+        return response.notFound({
+          message: 'Aucune entreprise trouvée.',
+        })
+      }
+
       await bouncer.authorize(deleteCompanyImages, company)
 
       await this.companyImageService.deleteImage(imageId)
