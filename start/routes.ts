@@ -101,6 +101,7 @@ router
             router.put(':id', [CompaniesController, 'update'])
             router.delete(':id', [CompaniesController, 'destroy'])
             router.patch(':id/toggle-block', [CompaniesController, 'toggleBlockedStatus'])
+            router.patch(':id/toggle-approve', [CompaniesController, 'toggleApproveStatus'])
           })
           .middleware([middleware.auth()])
 

@@ -22,6 +22,8 @@ export default class CompanyService {
     'logo',
     'bannerImage',
     'description',
+    'location',
+    'daily_program',
   ]
 
   /**
@@ -213,6 +215,25 @@ export default class CompanyService {
       company.blockedAt = null
     } else {
       company.blockedAt = DateTime.now()
+    }
+    await company.save()
+    return company
+  }
+
+  /**
+   * Toggle the approve status of a company.
+   * If the company is currently approved, un-approve it (set verifiedAt to null).
+   * If the company is not approved, approve it (set verifiedAt to current date).
+   * @param companyId - The ID of the company to toggle
+   * @returns The updated company
+   * @throws Error if company is not found
+   */
+  async toggleApproveStatus(companyId: string): Promise<Company> {
+    const company = await Company.findOrFail(companyId)
+    if (company.verifiedAt) {
+      company.verifiedAt = null
+    } else {
+      company.verifiedAt = DateTime.now()
     }
     await company.save()
     return company

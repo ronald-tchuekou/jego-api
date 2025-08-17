@@ -182,4 +182,33 @@ export default class CompaniesController {
       })
     }
   }
+
+  /**
+   * Toggle approve status of a company
+   */
+  async toggleApproveStatus({ params, response }: HttpContext) {
+    try {
+      const company = await this.companyService.findById(params.id)
+
+      if (!company) {
+        return response.notFound({
+          message: 'Aucune entreprise trouvée.',
+        })
+      }
+
+      const updatedCompany = await this.companyService.toggleApproveStatus(params.id)
+
+      const action = updatedCompany.verifiedAt ? 'approuvée' : 'désapprouvée'
+
+      return response.ok({
+        data: updatedCompany,
+        message: `Entreprise ${action} avec succès`,
+      })
+    } catch (error) {
+      return response.badRequest({
+        message: "Une erreur est survenue lors du changement de statut de l'entreprise.",
+        error: error.message,
+      })
+    }
+  }
 }
