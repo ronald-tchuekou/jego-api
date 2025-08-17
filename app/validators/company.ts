@@ -21,6 +21,44 @@ export const storeCompanyValidator = vine.compile(
     logo: vine.string().trim().optional(),
     bannerImage: vine.string().trim().optional(),
     description: vine.string().trim().optional(),
+    location: vine
+      .object({
+        lat: vine.number().optional(),
+        lng: vine.number().optional(),
+      })
+      .optional(),
+    daily_program: vine
+      .object({
+        Lundi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Mardi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Mercredi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Jeudi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Vendredi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Samedi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Dimanche: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+      })
+      .optional(),
   })
 )
 
@@ -45,5 +83,43 @@ export const updateCompanyValidator = vine.compile(
     logo: vine.string().trim().optional(),
     bannerImage: vine.string().trim().optional(),
     description: vine.string().trim().optional(),
+    location: vine
+      .object({
+        lat: vine.number().optional(),
+        lng: vine.number().optional(),
+      })
+      .optional(),
+    daily_program: vine
+      .object({
+        Lundi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Mardi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Mercredi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Jeudi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Vendredi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Samedi: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+        Dimanche: vine.object({
+          open: vine.string().trim().optional(),
+          close: vine.string().trim().optional(),
+        }),
+      })
+      .optional(),
   })
 )

@@ -25,6 +25,9 @@ export default class Post extends BaseModel {
   @column()
   declare category: string
 
+  @column()
+  declare image: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

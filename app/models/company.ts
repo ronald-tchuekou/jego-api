@@ -10,6 +10,8 @@ import CompanyDoc from './company_doc.js'
 import CompanyReview from './company_review.js'
 import CompanyService from './company_service.js'
 
+type DayForProgram = 'Lundi' | 'Mardi' | 'Mercredi' | 'Jeudi' | 'Vendredi' | 'Samedi' | 'Dimanche'
+
 export default class Company extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
@@ -76,6 +78,12 @@ export default class Company extends BaseModel {
 
   @column()
   declare blockedAt: DateTime | null
+
+  @column()
+  declare location: { lat?: number; lng?: number } | null
+
+  @column()
+  declare daily_program: Record<DayForProgram, { open?: string; close?: string }> | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
