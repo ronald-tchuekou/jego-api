@@ -1,12 +1,23 @@
+import Category from '#models/category'
+import CompanyImage from '#models/company_image'
 import Post from '#models/post'
 import User from '#models/user'
-import { BaseModel, column, hasMany, hasManyThrough } from '@adonisjs/lucid/orm'
-import type { HasMany, HasManyThrough } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany, hasManyThrough } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany, HasManyThrough } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import CompanyAppointmentRequest from './company_appointment_request.js'
+import CompanyDoc from './company_doc.js'
+import CompanyReview from './company_review.js'
+import CompanyService from './company_service.js'
+
+type DayForProgram = 'Lundi' | 'Mardi' | 'Mercredi' | 'Jeudi' | 'Vendredi' | 'Samedi' | 'Dimanche'
 
 export default class Company extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
+
+  @column()
+  declare categoryId: string | null
 
   @column()
   declare name: string
@@ -18,7 +29,7 @@ export default class Company extends BaseModel {
   declare phone: string
 
   @column()
-  declare address: string
+  declare address: string | null
 
   @column()
   declare city: string | null
@@ -27,7 +38,7 @@ export default class Company extends BaseModel {
   declare state: string | null
 
   @column()
-  declare zip_code: string | null
+  declare zipCode: string | null
 
   @column()
   declare country: string | null
@@ -36,16 +47,43 @@ export default class Company extends BaseModel {
   declare website: string | null
 
   @column()
+  declare facebook: string | null
+
+  @column()
+  declare instagram: string | null
+
+  @column()
+  declare twitter: string | null
+
+  @column()
+  declare linkedin: string | null
+
+  @column()
+  declare youtube: string | null
+
+  @column()
+  declare tiktok: string | null
+
+  @column()
   declare logo: string | null
+
+  @column()
+  declare bannerImage: string | null
 
   @column()
   declare description: string | null
 
   @column()
-  declare verified_at: DateTime | null
+  declare verifiedAt: DateTime | null
 
   @column()
-  declare blocked_at: DateTime | null
+  declare blockedAt: DateTime | null
+
+  @column()
+  declare location: { lat?: number; lng?: number } | null
+
+  @column()
+  declare daily_program: Record<DayForProgram, { open?: string; close?: string }> | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -58,4 +96,22 @@ export default class Company extends BaseModel {
 
   @hasMany(() => User)
   declare users: HasMany<typeof User>
+
+  @hasMany(() => CompanyImage)
+  declare images: HasMany<typeof CompanyImage>
+
+  @belongsTo(() => Category)
+  declare category: BelongsTo<typeof Category>
+
+  @hasMany(() => CompanyDoc)
+  declare docs: HasMany<typeof CompanyDoc>
+
+  @hasMany(() => CompanyService)
+  declare services: HasMany<typeof CompanyService>
+
+  @hasMany(() => CompanyReview)
+  declare reviews: HasMany<typeof CompanyReview>
+
+  @hasMany(() => CompanyAppointmentRequest)
+  declare appointmentRequests: HasMany<typeof CompanyAppointmentRequest>
 }

@@ -18,3 +18,7 @@ Content-Type: application/json
   "email": "ronaldtchuekou@gmail.com",
   "password": "password"
 }
+
+### Toggle block user
+PATCH http://localhost:3333/v1/users/70f6dec3-90e7-48ab-b89f-ee3415039170/toggle-block
+Content-Type: application/json

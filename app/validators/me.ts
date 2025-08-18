@@ -10,8 +10,6 @@ export const updateMeValidator = vine.compile(
     state: vine.string().optional(),
     zipCode: vine.string().optional(),
     country: vine.string().optional(),
-    password: vine.string().optional(),
-    passwordConfirm: vine.string().sameAs('password').optional().requiredIfExists('password'),
   })
 )
 

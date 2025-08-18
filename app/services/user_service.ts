@@ -181,7 +181,7 @@ export default class UserService {
     const userToken = await userTokenService.findTokenWithUser(token)
 
     if (!userToken) {
-      throw new Error('Invalid or expired reset token')
+      throw new Error('Le token est invalide ou à expiré.')
     }
 
     let user = userToken.user
@@ -206,29 +206,51 @@ export default class UserService {
    * @param limit - The number of users per page
    * @returns The users
    */
-  async getUsers(query: string = '', page: number = 1, limit: number = 10): Promise<User[]> {
-    let queryBuilder = User.query()
+  async getUsers(filters: {
+    search?: string
+    page?: number
+    limit?: number
+    companyId?: string
+    role?: UserRole
+    status?: 'active' | 'blocked'
+  }): Promise<User[]> {
+    const { search = '', page = 1, limit = 10, companyId = '', role, status } = filters
 
-    if (query) {
-      queryBuilder = queryBuilder
-        .where('firstName', 'ilike', `%${query}%`)
-        .orWhere('lastName', 'ilike', `%${query}%`)
-        .orWhere('email', 'ilike', `%${query}%`)
+    let queryBuilder = User.query()
+      .where((query) => {
+        query.whereILike('firstName', `%${search}%`)
+        query.orWhereILike('lastName', `%${search}%`)
+        query.orWhereILike('email', `%${search}%`)
+      })
+      .preload('company')
+      .preload('posts')
+
+    if (companyId) queryBuilder = queryBuilder.andWhere('companyId', companyId)
+
+    if (role) queryBuilder = queryBuilder.andWhere('role', role)
+
+    if (status) {
+      if (status === 'blocked') queryBuilder = queryBuilder.andWhereNotNull('blockedAt')
+      if (status === 'active') queryBuilder = queryBuilder.andWhereNull('blockedAt')
     }
 
-    const users = await queryBuilder.paginate(page, limit)
+    const users = await queryBuilder
+      .orderBy('firstName', 'asc')
+      .orderBy('lastName', 'asc')
+      .paginate(page, limit)
 
     return users
   }
 
-  async getTotalUsers(query: string = ''): Promise<number> {
+  async getTotalUsers(search: string = ''): Promise<number> {
     let queryBuilder = User.query()
 
-    if (query) {
-      queryBuilder = queryBuilder
-        .where('firstName', 'ilike', `%${query}%`)
-        .orWhere('lastName', 'ilike', `%${query}%`)
-        .orWhere('email', 'ilike', `%${query}%`)
+    if (search) {
+      queryBuilder = queryBuilder.where((query) => {
+        query.whereILike('firstName', `%${search}%`)
+        query.orWhereILike('lastName', `%${search}%`)
+        query.orWhereILike('email', `%${search}%`)
+      })
     }
 
     const total = (await queryBuilder.count('id as total')) as (User & { total: number })[]
@@ -242,8 +264,8 @@ export default class UserService {
    * @returns The user
    * @throws Error if user is not found
    */
-  async findById(userId: string): Promise<User> {
-    const user = await User.findOrFail(userId)
+  async findById(userId: string): Promise<User | null> {
+    const user = await User.query().preload('company').preload('posts').where('id', userId).first()
     return user
   }
 
@@ -254,7 +276,11 @@ export default class UserService {
    * @throws Error if user is not found
    */
   async findByEmail(email: string): Promise<User | null> {
-    const user = await User.query().where('email', email).first()
+    const user = await User.query()
+      .preload('company')
+      .preload('posts')
+      .where('email', email)
+      .first()
     return user
   }
 
@@ -268,5 +294,18 @@ export default class UserService {
     const user = await User.findOrFail(userId)
     await user.delete()
     return true
+  }
+
+  /**
+   * Toggle the block status of a user
+   * @param userId - The ID of the user to toggle the block status
+   * @returns The updated user
+   * @throws Error if user is not found
+   */
+  async toggleBlockUser(userId: string): Promise<User> {
+    const user = await User.findOrFail(userId)
+    user.blockedAt = user.blockedAt ? null : DateTime.now()
+    await user.save()
+    return user
   }
 }

@@ -1,6 +1,7 @@
 import UserLoggedIn from '#events/user_logged_in'
 import User from '#models/user'
 import UserService from '#services/user_service'
+import { TokenUtil } from '#utils/token_util'
 import {
   forgotPasswordValidator,
   loginValidator,
@@ -20,7 +21,7 @@ export default class AuthController {
       const { email, password } = await request.validateUsing(loginValidator)
       const user = await User.verifyCredentials(email, password)
 
-      const token = await User.accessTokens.create(user, ['*'], {
+      const token = await User.accessTokens.create(user, TokenUtil.getUserAbilities(user), {
         expiresIn: '30d',
       })
 
@@ -44,7 +45,7 @@ export default class AuthController {
     const data = await request.validateUsing(registerValidator)
     const user = await userService.create(data)
 
-    const token = await User.accessTokens.create(user, ['*'], {
+    const token = await User.accessTokens.create(user, TokenUtil.getUserAbilities(user), {
       expiresIn: '30d',
     })
 
@@ -68,14 +69,16 @@ export default class AuthController {
 
   async revalidateToken({ auth, response }: HttpContext) {
     const user = auth.use('api').getUserOrFail()
-    const token = await User.accessTokens.create(user, ['*'], {
-      expiresIn: '30d',
-    })
+    const isExpired = auth.user?.currentAccessToken.isExpired()
 
-    return response.ok({
-      user,
-      token: token.value!.release(),
-    })
+    if (isExpired) {
+      return response.unauthorized({
+        error: 'Token expired',
+        message: 'Token expired',
+      })
+    }
+
+    return response.ok(user)
   }
 
   /**
@@ -108,7 +111,7 @@ export default class AuthController {
 
     const user = await userService.resetPassword(data.token, data.password)
 
-    const token = await User.accessTokens.create(user, ['*'], {
+    const token = await User.accessTokens.create(user, TokenUtil.getUserAbilities(user), {
       expiresIn: '30d',
     })
 
@@ -125,12 +128,12 @@ export default class AuthController {
 
     const user = await userService.verify(userId, token)
 
-    const accessToken = await User.accessTokens.create(user, ['*'], {
+    const accessToken = await User.accessTokens.create(user, TokenUtil.getUserAbilities(user), {
       expiresIn: '30d',
     })
 
     return response.ok({
-      message: 'Email has been verified successfully',
+      message: "L'email a été vérifié avec succès.",
       user,
       token: accessToken.value!.release(),
     })
