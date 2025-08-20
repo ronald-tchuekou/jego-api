@@ -41,7 +41,7 @@ export default class PostService {
     })
 
     const savedPost = await post.save()
-    await savedPost.load('user')
+    await savedPost.load('user', (userQuery) => userQuery.preload('company'))
 
     return savedPost
   }
@@ -63,7 +63,7 @@ export default class PostService {
     })
 
     const savedPost = await post.save()
-    await savedPost.load('user')
+    await savedPost.load('user', (userQuery) => userQuery.preload('company'))
 
     return savedPost
   }
@@ -84,7 +84,9 @@ export default class PostService {
   }) {
     const { search = '', page = 1, limit = 10, userId, status, type, category } = filters
 
-    let queryBuilder = Post.query().preload('user').orderBy('createdAt', 'desc')
+    let queryBuilder = Post.query()
+      .preload('user', (userQuery) => userQuery.preload('company'))
+      .orderBy('createdAt', 'desc')
 
     // Apply search filter
     if (search) {
@@ -172,7 +174,10 @@ export default class PostService {
    * @returns The post with user relationship loaded
    */
   async findById(postId: string): Promise<Post | null> {
-    return Post.query().where('id', postId).preload('user').first()
+    return Post.query()
+      .where('id', postId)
+      .preload('user', (userQuery) => userQuery.preload('company'))
+      .first()
   }
 
   /**
@@ -195,7 +200,7 @@ export default class PostService {
 
     let queryBuilder = Post.query()
       .where('userId', userId)
-      .preload('user')
+      .preload('user', (userQuery) => userQuery.preload('company'))
       .orderBy('createdAt', 'desc')
 
     // Apply additional filters
@@ -248,7 +253,7 @@ export default class PostService {
 
     let queryBuilder = Post.query()
       .where('category', category)
-      .preload('user')
+      .preload('user', (userQuery) => userQuery.preload('company'))
       .orderBy('createdAt', 'desc')
 
     // Apply search filter

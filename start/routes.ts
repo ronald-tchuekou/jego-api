@@ -19,6 +19,7 @@ const CompaniesController = () => import('#controllers/companies_controller')
 const CompanyImagesController = () => import('#controllers/company_images_controller')
 const CompanyReviewsController = () => import('#controllers/company_reviews_controller')
 const PostsController = () => import('#controllers/posts_controller')
+const FilesController = () => import('#controllers/files_controller')
 
 router.get('', async () => {
   return {
@@ -28,7 +29,9 @@ router.get('', async () => {
 
 router
   .group(() => {
-    // Auth routes
+    /**
+     * Auth routes
+     */
     router
       .group(() => {
         router.post('logout', [AuthController, 'logout']).middleware([middleware.auth()])
@@ -40,7 +43,9 @@ router
       })
       .prefix('auth')
 
-    // Me routes
+    /**
+     * Me routes
+     */
     router
       .group(() => {
         router.get('', [MeController, 'get'])
@@ -56,7 +61,9 @@ router
       .prefix('me')
       .middleware([middleware.auth()])
 
-    // User routes
+    /**
+     * User routes
+     */
     router
       .group(() => {
         // Protected
@@ -75,7 +82,9 @@ router
       })
       .prefix('users')
 
-    // Categories routes
+    /**
+     * Categories routes
+     */
     router
       .group(() => {
         // Protected
@@ -93,7 +102,9 @@ router
       })
       .prefix('categories')
 
-    // Companies routes
+    /**
+     * Companies routes
+     */
     router
       .group(() => {
         // Protected
@@ -113,7 +124,9 @@ router
       })
       .prefix('companies')
 
-    // Company Images routes
+    /**
+     * Company Images routes
+     */
     router
       .group(() => {
         // Protected
@@ -129,7 +142,9 @@ router
       })
       .prefix('company-images')
 
-    // Company Reviews routes
+    /**
+     * Company Reviews routes
+     */
     router
       .group(() => {
         // Protected
@@ -149,7 +164,9 @@ router
       })
       .prefix('company-reviews')
 
-    // Posts routes
+    /**
+     * Posts routes
+     */
     router
       .group(() => {
         // Protected
@@ -169,6 +186,18 @@ router
         router.get('count', [PostsController, 'count'])
       })
       .prefix('posts')
+
+    /**
+     * Files routes
+     */
+    router
+      .group(() => {
+        router.post('upload-single', [FilesController, 'uploadSingle'])
+        router.post('upload-multiple', [FilesController, 'uploadMultiple'])
+        router.get('load', [FilesController, 'load'])
+        router.delete('revert', [FilesController, 'revert'])
+      })
+      .prefix('files')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })
