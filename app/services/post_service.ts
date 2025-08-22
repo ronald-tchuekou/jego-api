@@ -163,9 +163,10 @@ export default class PostService {
       queryBuilder = queryBuilder.andWhere('category', category)
     }
 
-    const total = (await queryBuilder.count('id as total')) as (Post & { total: number })[]
+    const result = await queryBuilder.count('*', 'total')
+    const item = result[0].$extras as { total: number }
 
-    return total[0].total
+    return item.total
   }
 
   /**

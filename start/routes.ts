@@ -70,6 +70,7 @@ router
         router
           .group(() => {
             router.get('', [UserController, 'index'])
+            router.get('count', [UserController, 'getTotal'])
             router.post('', [UserController, 'store'])
             router.put(':id', [UserController, 'update'])
             router.delete(':id', [UserController, 'destroy'])
@@ -110,6 +111,7 @@ router
         // Protected
         router
           .group(() => {
+            router.get('count', [CompaniesController, 'getTotal'])
             router.put(':id', [CompaniesController, 'update'])
             router.delete(':id', [CompaniesController, 'destroy'])
             router.patch(':id/toggle-block', [CompaniesController, 'toggleBlockedStatus'])
@@ -118,9 +120,9 @@ router
           .middleware([middleware.auth()])
 
         // Public
-        router.get(':id', [CompaniesController, 'show'])
         router.get('', [CompaniesController, 'index'])
         router.post('', [CompaniesController, 'store'])
+        router.get(':id', [CompaniesController, 'show'])
       })
       .prefix('companies')
 
@@ -158,8 +160,8 @@ router
           .middleware([middleware.auth()])
 
         // Public
-        router.get(':companyId', [CompanyReviewsController, 'index'])
         router.get(':id', [CompanyReviewsController, 'show'])
+        router.get('company/:companyId', [CompanyReviewsController, 'index'])
         router.get(':companyId/stats', [CompanyReviewsController, 'getCompanyStats'])
       })
       .prefix('company-reviews')
@@ -180,10 +182,10 @@ router
 
         // Public
         router.get('', [PostsController, 'index'])
+        router.get('count', [PostsController, 'getTotal'])
         router.get(':id', [PostsController, 'show'])
         router.get('user/:userId', [PostsController, 'getByUser'])
         router.get('category/:category', [PostsController, 'getByCategory'])
-        router.get('count', [PostsController, 'count'])
       })
       .prefix('posts')
 

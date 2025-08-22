@@ -9,6 +9,15 @@ export default class CompaniesController {
   constructor(protected companyService: CompanyService) {}
 
   /**
+   * Get the total number of companies
+   */
+  async getTotal({ request, response }: HttpContext) {
+    const { search = '' } = request.qs()
+    const total = await this.companyService.getTotal(search)
+    return response.ok({ count: total })
+  }
+
+  /**
    * Display a list of companies
    */
   async index({ request, response }: HttpContext) {

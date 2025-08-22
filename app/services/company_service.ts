@@ -146,9 +146,10 @@ export default class CompanyService {
       })
     }
 
-    const total = (await queryBuilder.count('id as total')) as (Company & { total: number })[]
+    const result = await queryBuilder.count('*', 'total')
+    const item = result[0].$extras as { total: number }
 
-    return total[0].total
+    return item.total
   }
 
   /**

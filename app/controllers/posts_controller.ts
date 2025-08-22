@@ -191,7 +191,7 @@ export default class PostsController {
   /**
    * Get total count of posts
    */
-  async count({ request, response }: HttpContext) {
+  async getTotal({ request, response }: HttpContext) {
     try {
       const { search = '', userId, status, type, category } = request.qs()
 
@@ -203,7 +203,7 @@ export default class PostsController {
         category,
       })
 
-      return response.ok({ total })
+      return response.ok({ count: total })
     } catch (error) {
       return response.badRequest({
         message: 'Une erreur est survenue lors du comptage des posts.',
