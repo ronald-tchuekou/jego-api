@@ -71,6 +71,7 @@ router
           .group(() => {
             router.get('', [UserController, 'index'])
             router.get('count', [UserController, 'getTotal'])
+            router.get('count-per-day', [UserController, 'getUserCountPerDay'])
             router.post('', [UserController, 'store'])
             router.put(':id', [UserController, 'update'])
             router.delete(':id', [UserController, 'destroy'])
@@ -112,6 +113,7 @@ router
         router
           .group(() => {
             router.get('count', [CompaniesController, 'getTotal'])
+            router.get('count-per-day', [CompaniesController, 'getCompaniesCountPerDay'])
             router.put(':id', [CompaniesController, 'update'])
             router.delete(':id', [CompaniesController, 'destroy'])
             router.patch(':id/toggle-block', [CompaniesController, 'toggleBlockedStatus'])
@@ -183,6 +185,7 @@ router
         // Public
         router.get('', [PostsController, 'index'])
         router.get('count', [PostsController, 'getTotal'])
+        router.get('count-per-day', [PostsController, 'getPostsCountPerDay'])
         router.get(':id', [PostsController, 'show'])
         router.get('user/:userId', [PostsController, 'getByUser'])
         router.get('category/:category', [PostsController, 'getByCategory'])

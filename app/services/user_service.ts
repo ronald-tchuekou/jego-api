@@ -6,6 +6,7 @@ import UserVerified from '#events/user_verified'
 import User, { UserRole } from '#models/user'
 import { UserTokenService } from '#services/user_token_service'
 import { inject } from '@adonisjs/core'
+import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 
 @inject()
@@ -308,5 +309,62 @@ export default class UserService {
     user.blockedAt = user.blockedAt ? null : DateTime.now()
     await user.save()
     return user
+  }
+
+  /**
+   * Get user count per day within a date range
+   * @param startDate - The start date (YYYY-MM-DD format)
+   * @param endDate - The end date (YYYY-MM-DD format)
+   * @returns Array of objects with date and count
+   */
+  async getUserCountPerDay(
+    startDate: string,
+    endDate: string
+  ): Promise<{ date: string; count: number }[]> {
+    const start = DateTime.fromISO(startDate).startOf('day')
+    const end = DateTime.fromISO(endDate).endOf('day')
+
+    if (!start.isValid || !end.isValid) {
+      throw new Error('Invalid date format. Please use YYYY-MM-DD format.')
+    }
+
+    if (start > end) {
+      throw new Error('Start date must be before or equal to end date.')
+    }
+
+    // Query to get user count per day using raw SQL
+    const result = await db.rawQuery(
+      `
+      SELECT
+        DATE(created_at) as date,
+        COUNT(*) as count
+      FROM users
+      WHERE created_at between ? AND ?
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+      `,
+      [start.toSQL(), end.toSQL()]
+    )
+    // Create a map of existing results
+    const resultMap = new Map<string, number>()
+    result.rows.forEach((row: any) => {
+      const date = DateTime.fromJSDate(row.date).toFormat('yyyy-MM-dd')
+      resultMap.set(date, row.count)
+    })
+
+    // Fill in missing dates with count 0
+    const finalResult: { date: string; count: number }[] = []
+    let currentDate = DateTime.fromISO(startDate)
+
+    while (currentDate <= DateTime.fromISO(endDate)) {
+      const dateString = currentDate.toFormat('yyyy-MM-dd')
+      finalResult.push({
+        date: dateString,
+        count: resultMap.get(dateString) || 0,
+      })
+      currentDate = currentDate.plus({ days: 1 })
+    }
+
+    return finalResult
   }
 }

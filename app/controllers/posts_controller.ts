@@ -3,6 +3,7 @@ import PostService from '#services/post_service'
 import { storePostValidator, updatePostValidator } from '#validators/post'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 
 @inject()
 export default class PostsController {
@@ -210,5 +211,23 @@ export default class PostsController {
         error: error.message,
       })
     }
+  }
+
+  /**
+   * Get posts count per day
+   */
+  async getPostsCountPerDay({ request, response }: HttpContext) {
+    const { startDate, endDate } = request.qs()
+    let sDate = startDate
+    let eDate = endDate
+
+    if (!startDate || !endDate) {
+      sDate = DateTime.now().startOf('month').toFormat('yyyy-MM-dd')
+      eDate = DateTime.now().endOf('month').toFormat('yyyy-MM-dd')
+    }
+
+    const postsCountPerDay = await this.postService.getPostCountPerDay(sDate, eDate)
+
+    return response.ok({ data: postsCountPerDay, startDate: sDate, endDate: eDate })
   }
 }
