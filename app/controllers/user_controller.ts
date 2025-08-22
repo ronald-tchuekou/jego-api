@@ -3,19 +3,38 @@ import UserService from '#services/user_service'
 import { storeUserValidator, updateUserValidator } from '#validators/user'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 
+@inject()
 export default class UserController {
+  constructor(protected userService: UserService) {}
+
+  /**
+   * Get the total number of users
+   */
+  async getTotal({ request, response }: HttpContext) {
+    const { search = '' } = request.qs()
+    const total = await this.userService.getTotalUsers(search)
+    return response.ok({ count: total })
+  }
+
   /**
    * Display a list of resource
    */
-  @inject()
-  async index({ response, request, bouncer }: HttpContext, userService: UserService) {
+  async index({ response, request, bouncer }: HttpContext) {
     const { search = '', page = 1, limit = 10, companyId, role, status } = request.qs()
 
     try {
       await bouncer.authorize(readUsers)
 
-      const users = await userService.getUsers({ search, page, limit, companyId, role, status })
+      const users = await this.userService.getUsers({
+        search,
+        page,
+        limit,
+        companyId,
+        role,
+        status,
+      })
 
       return response.ok(users)
     } catch (error) {
@@ -29,13 +48,12 @@ export default class UserController {
   /**
    * Handle form submission for the creation action
    */
-  @inject()
-  async store({ request, response, bouncer }: HttpContext, userService: UserService) {
+  async store({ request, response, bouncer }: HttpContext) {
     try {
       await bouncer.authorize(createUser)
 
       const userData = await request.validateUsing(storeUserValidator)
-      const savedUser = await userService.create(userData)
+      const savedUser = await this.userService.create(userData)
       return response.created({ data: savedUser })
     } catch (error) {
       return response.badRequest({
@@ -48,10 +66,9 @@ export default class UserController {
   /**
    * Show individual record
    */
-  @inject()
-  async show({ params, response }: HttpContext, userService: UserService) {
+  async show({ params, response }: HttpContext) {
     try {
-      const user = await userService.findById(params.id)
+      const user = await this.userService.findById(params.id)
       return response.ok({ data: user })
     } catch (error) {
       return response.notFound({
@@ -64,13 +81,12 @@ export default class UserController {
   /**
    * Handle form submission for the edit action
    */
-  @inject()
-  async update({ params, request, response, bouncer }: HttpContext, userService: UserService) {
+  async update({ params, request, response, bouncer }: HttpContext) {
     try {
       await bouncer.authorize(updateUser)
 
       const userData = await request.validateUsing(updateUserValidator)
-      const updatedUser = await userService.update(params.id, userData)
+      const updatedUser = await this.userService.update(params.id, userData)
       return response.ok({ data: updatedUser })
     } catch (error) {
       return response.badRequest({
@@ -80,12 +96,11 @@ export default class UserController {
     }
   }
 
-  @inject()
-  async toggleBlockUser({ params, response, bouncer }: HttpContext, userService: UserService) {
+  async toggleBlockUser({ params, response, bouncer }: HttpContext) {
     try {
       await bouncer.authorize(updateUser)
 
-      const updatedUser = await userService.toggleBlockUser(params.id)
+      const updatedUser = await this.userService.toggleBlockUser(params.id)
       return response.ok({ data: updatedUser })
     } catch (error) {
       return response.badRequest({
@@ -98,12 +113,11 @@ export default class UserController {
   /**
    * Delete record
    */
-  @inject()
-  async destroy({ params, response, bouncer }: HttpContext, userService: UserService) {
+  async destroy({ params, response, bouncer }: HttpContext) {
     try {
       await bouncer.authorize(deleteUser)
 
-      const result = await userService.delete(params.id)
+      const result = await this.userService.delete(params.id)
 
       if (!result) return response.notFound({ message: "L'utilisateur n'a pas été trouvé." })
 
@@ -114,5 +128,23 @@ export default class UserController {
         error: error.message,
       })
     }
+  }
+
+  /**
+   * Get the number of users per day
+   */
+  async getUserCountPerDay({ request, response }: HttpContext) {
+    const { startDate, endDate } = request.qs()
+    let sDate = startDate
+    let eDate = endDate
+
+    if (!startDate || !endDate) {
+      sDate = DateTime.now().startOf('month').toFormat('yyyy-MM-dd')
+      eDate = DateTime.now().endOf('month').toFormat('yyyy-MM-dd')
+    }
+
+    const userCountPerDay = await this.userService.getUserCountPerDay(sDate, eDate)
+
+    return response.ok({ data: userCountPerDay, startDate: sDate, endDate: eDate })
   }
 }

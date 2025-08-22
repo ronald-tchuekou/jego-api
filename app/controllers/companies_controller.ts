@@ -3,10 +3,20 @@ import CompanyService from '#services/company_service'
 import { storeCompanyValidator, updateCompanyValidator } from '#validators/company'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 
 @inject()
 export default class CompaniesController {
   constructor(protected companyService: CompanyService) {}
+
+  /**
+   * Get the total number of companies
+   */
+  async getTotal({ request, response }: HttpContext) {
+    const { search = '' } = request.qs()
+    const total = await this.companyService.getTotal(search)
+    return response.ok({ count: total })
+  }
 
   /**
    * Display a list of companies
@@ -210,5 +220,22 @@ export default class CompaniesController {
         error: error.message,
       })
     }
+  }
+
+  /**
+   * Get companies count per day
+   */
+  async getCompaniesCountPerDay({ request, response }: HttpContext) {
+    const { startDate, endDate } = request.qs()
+    let sDate = startDate
+    let eDate = endDate
+
+    if (!startDate || !endDate) {
+      sDate = DateTime.now().startOf('month').toFormat('yyyy-MM-dd')
+      eDate = DateTime.now().endOf('month').toFormat('yyyy-MM-dd')
+    }
+
+    const companiesCountPerDay = await this.companyService.getCompanyCountPerDay(sDate, eDate)
+    return response.ok({ data: companiesCountPerDay, startDate: sDate, endDate: eDate })
   }
 }
