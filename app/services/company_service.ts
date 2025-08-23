@@ -1,4 +1,5 @@
 import Company from '#models/company'
+import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 
 export default class CompanyService {
@@ -146,9 +147,10 @@ export default class CompanyService {
       })
     }
 
-    const total = (await queryBuilder.count('id as total')) as (Company & { total: number })[]
+    const result = await queryBuilder.count('*', 'total')
+    const item = result[0].$extras as { total: number }
 
-    return total[0].total
+    return item.total
   }
 
   /**
@@ -237,5 +239,62 @@ export default class CompanyService {
     }
     await company.save()
     return company
+  }
+
+  /**
+   * Get company count per day within a date range
+   * @param startDate - The start date (YYYY-MM-DD format)
+   * @param endDate - The end date (YYYY-MM-DD format)
+   * @returns Array of objects with date and count
+   */
+  async getCompanyCountPerDay(
+    startDate: string,
+    endDate: string
+  ): Promise<{ date: string; count: number }[]> {
+    const start = DateTime.fromISO(startDate).startOf('day')
+    const end = DateTime.fromISO(endDate).endOf('day')
+
+    if (!start.isValid || !end.isValid) {
+      throw new Error('Invalid date format. Please use YYYY-MM-DD format.')
+    }
+
+    if (start > end) {
+      throw new Error('Start date must be before or equal to end date.')
+    }
+
+    // Query to get company count per day using raw SQL
+    const result = await db.rawQuery(
+      `
+      SELECT
+        DATE(created_at) as date,
+        COUNT(*) as count
+      FROM companies
+      WHERE created_at between ? AND ?
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+      `,
+      [start.toSQL(), end.toSQL()]
+    )
+    // Create a map of existing results
+    const resultMap = new Map<string, number>()
+    result.rows.forEach((row: any) => {
+      const date = DateTime.fromJSDate(row.date).toFormat('yyyy-MM-dd')
+      resultMap.set(date, row.count)
+    })
+
+    // Fill in missing dates with count 0
+    const finalResult: { date: string; count: number }[] = []
+    let currentDate = DateTime.fromISO(startDate)
+
+    while (currentDate <= DateTime.fromISO(endDate)) {
+      const dateString = currentDate.toFormat('yyyy-MM-dd')
+      finalResult.push({
+        date: dateString,
+        count: resultMap.get(dateString) || 0,
+      })
+      currentDate = currentDate.plus({ days: 1 })
+    }
+
+    return finalResult
   }
 }

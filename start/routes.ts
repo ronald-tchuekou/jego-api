@@ -20,6 +20,7 @@ const CompanyImagesController = () => import('#controllers/company_images_contro
 const CompanyReviewsController = () => import('#controllers/company_reviews_controller')
 const PostsController = () => import('#controllers/posts_controller')
 const FilesController = () => import('#controllers/files_controller')
+const JobsController = () => import('#controllers/jobs_controller')
 
 router.get('', async () => {
   return {
@@ -70,6 +71,8 @@ router
         router
           .group(() => {
             router.get('', [UserController, 'index'])
+            router.get('count', [UserController, 'getTotal'])
+            router.get('count-per-day', [UserController, 'getUserCountPerDay'])
             router.post('', [UserController, 'store'])
             router.put(':id', [UserController, 'update'])
             router.delete(':id', [UserController, 'destroy'])
@@ -110,6 +113,8 @@ router
         // Protected
         router
           .group(() => {
+            router.get('count', [CompaniesController, 'getTotal'])
+            router.get('count-per-day', [CompaniesController, 'getCompaniesCountPerDay'])
             router.put(':id', [CompaniesController, 'update'])
             router.delete(':id', [CompaniesController, 'destroy'])
             router.patch(':id/toggle-block', [CompaniesController, 'toggleBlockedStatus'])
@@ -118,9 +123,9 @@ router
           .middleware([middleware.auth()])
 
         // Public
-        router.get(':id', [CompaniesController, 'show'])
         router.get('', [CompaniesController, 'index'])
         router.post('', [CompaniesController, 'store'])
+        router.get(':id', [CompaniesController, 'show'])
       })
       .prefix('companies')
 
@@ -158,8 +163,8 @@ router
           .middleware([middleware.auth()])
 
         // Public
-        router.get(':companyId', [CompanyReviewsController, 'index'])
         router.get(':id', [CompanyReviewsController, 'show'])
+        router.get('company/:companyId', [CompanyReviewsController, 'index'])
         router.get(':companyId/stats', [CompanyReviewsController, 'getCompanyStats'])
       })
       .prefix('company-reviews')
@@ -180,10 +185,11 @@ router
 
         // Public
         router.get('', [PostsController, 'index'])
+        router.get('count', [PostsController, 'getTotal'])
+        router.get('count-per-day', [PostsController, 'getPostsCountPerDay'])
         router.get(':id', [PostsController, 'show'])
         router.get('user/:userId', [PostsController, 'getByUser'])
         router.get('category/:category', [PostsController, 'getByCategory'])
-        router.get('count', [PostsController, 'count'])
       })
       .prefix('posts')
 
@@ -198,6 +204,36 @@ router
         router.delete('revert', [FilesController, 'revert'])
       })
       .prefix('files')
+
+    /**
+     * Jobs routes
+     */
+    router
+      .group(() => {
+        // Protected
+        router
+          .group(() => {
+            router.post('', [JobsController, 'store'])
+            router.put(':id', [JobsController, 'update'])
+            router.delete(':id', [JobsController, 'destroy'])
+            router.patch(':id/toggle-status', [JobsController, 'toggleStatus'])
+            router.patch(':id/close', [JobsController, 'close'])
+            router.patch(':id/reopen', [JobsController, 'reopen'])
+            router.patch(':id/set-expiration', [JobsController, 'setExpiration'])
+          })
+          .middleware([middleware.auth()])
+
+        // Public
+        router.get('', [JobsController, 'index'])
+        router.get('count', [JobsController, 'getTotal'])
+        router.get('count-per-day', [JobsController, 'getJobsCountPerDay'])
+        router.get('expired', [JobsController, 'getExpired'])
+        router.get('active', [JobsController, 'getActive'])
+        router.get('user/:userId', [JobsController, 'getByUser'])
+        router.get('company/:companyId', [JobsController, 'searchByCompany'])
+        router.get('stats', [JobsController, 'getStatistics'])
+      })
+      .prefix('jobs')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })

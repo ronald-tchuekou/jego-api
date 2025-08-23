@@ -1,4 +1,5 @@
 import Company from '#models/company'
+import Job from '#models/job'
 import Post from '#models/post'
 import UserToken from '#models/user_token'
 import { AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
@@ -97,6 +98,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => Post)
   declare posts: HasMany<typeof Post>
+
+  @hasMany(() => Job)
+  declare jobs: HasMany<typeof Job>
 
   currentAccessToken?: AccessToken
 }
