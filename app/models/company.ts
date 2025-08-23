@@ -1,5 +1,6 @@
 import Category from '#models/category'
 import CompanyImage from '#models/company_image'
+import Job from '#models/job'
 import Post from '#models/post'
 import User from '#models/user'
 import { BaseModel, belongsTo, column, hasMany, hasManyThrough } from '@adonisjs/lucid/orm'
@@ -114,4 +115,7 @@ export default class Company extends BaseModel {
 
   @hasMany(() => CompanyAppointmentRequest)
   declare appointmentRequests: HasMany<typeof CompanyAppointmentRequest>
+
+  @hasManyThrough([() => Job, () => User])
+  declare jobs: HasManyThrough<typeof Job>
 }
