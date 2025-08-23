@@ -332,9 +332,9 @@ export default class JobService {
    * @returns The updated job
    * @throws Error if job is not found
    */
-  async setExpiration(jobId: string, expiresAt: DateTime | null): Promise<Job> {
+  async setExpiration(jobId: string, expiresAt: Date | null): Promise<Job> {
     const job = await Job.findOrFail(jobId)
-    job.expiresAt = expiresAt
+    job.expiresAt = expiresAt ? DateTime.fromJSDate(expiresAt) : null
     const savedJob = await job.save()
     await savedJob.load('user')
     return savedJob
