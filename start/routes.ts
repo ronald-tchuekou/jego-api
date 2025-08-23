@@ -20,6 +20,7 @@ const CompanyImagesController = () => import('#controllers/company_images_contro
 const CompanyReviewsController = () => import('#controllers/company_reviews_controller')
 const PostsController = () => import('#controllers/posts_controller')
 const FilesController = () => import('#controllers/files_controller')
+const JobsController = () => import('#controllers/jobs_controller')
 
 router.get('', async () => {
   return {
@@ -203,6 +204,36 @@ router
         router.delete('revert', [FilesController, 'revert'])
       })
       .prefix('files')
+
+    /**
+     * Jobs routes
+     */
+    router
+      .group(() => {
+        // Protected
+        router
+          .group(() => {
+            router.post('', [JobsController, 'store'])
+            router.put(':id', [JobsController, 'update'])
+            router.delete(':id', [JobsController, 'destroy'])
+            router.patch(':id/toggle-status', [JobsController, 'toggleStatus'])
+            router.patch(':id/close', [JobsController, 'close'])
+            router.patch(':id/reopen', [JobsController, 'reopen'])
+            router.patch(':id/set-expiration', [JobsController, 'setExpiration'])
+          })
+          .middleware([middleware.auth()])
+
+        // Public
+        router.get('', [JobsController, 'index'])
+        router.get('count', [JobsController, 'getTotal'])
+        router.get('count-per-day', [JobsController, 'getJobsCountPerDay'])
+        router.get('expired', [JobsController, 'getExpired'])
+        router.get('active', [JobsController, 'getActive'])
+        router.get('user/:userId', [JobsController, 'getByUser'])
+        router.get('company/:companyId', [JobsController, 'searchByCompany'])
+        router.get('stats', [JobsController, 'getStatistics'])
+      })
+      .prefix('jobs')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })
