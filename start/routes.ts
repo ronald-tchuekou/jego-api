@@ -232,6 +232,7 @@ router
         router.get('user/:userId', [JobsController, 'getByUser'])
         router.get('company/:companyId', [JobsController, 'searchByCompany'])
         router.get('stats', [JobsController, 'getStatistics'])
+        router.get(':id', [JobsController, 'show'])
       })
       .prefix('jobs')
 
