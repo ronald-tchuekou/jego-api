@@ -72,6 +72,7 @@ export default class JobsController {
 
       return response.created({ data: savedJob })
     } catch (error) {
+      console.log(error)
       return response.badRequest({
         message: "Une erreur est survenue lors de la création de l'emploi.",
         error: error.message,
@@ -129,6 +130,7 @@ export default class JobsController {
 
       return response.ok({ data: updatedJob })
     } catch (error) {
+      console.log(error)
       return response.badRequest({
         message: "Une erreur est survenue lors de la mise à jour de l'emploi.",
         error: error.message,
