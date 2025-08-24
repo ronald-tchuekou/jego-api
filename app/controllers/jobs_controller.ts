@@ -1,9 +1,9 @@
 import {
-   createJob,
-   deleteJob,
-   editJob,
-   manageJobStatus,
-   readJobStatistics,
+  createJob,
+  deleteJob,
+  editJob,
+  manageJobStatus,
+  readJobStatistics,
 } from '#abilities/job_abilities'
 import JobService from '#services/job_service'
 import { setExpirationValidator, storeJobValidator, updateJobValidator } from '#validators/job'
