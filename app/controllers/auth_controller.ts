@@ -20,6 +20,7 @@ export default class AuthController {
     try {
       const { email, password } = await request.validateUsing(loginValidator)
       const user = await User.verifyCredentials(email, password)
+      await user.load('company')
 
       const token = await User.accessTokens.create(user, TokenUtil.getUserAbilities(user), {
         expiresIn: '30d',
@@ -44,6 +45,7 @@ export default class AuthController {
   async register({ request, response }: HttpContext, userService: UserService) {
     const data = await request.validateUsing(registerValidator)
     const user = await userService.create(data)
+    await user.load('company')
 
     const token = await User.accessTokens.create(user, TokenUtil.getUserAbilities(user), {
       expiresIn: '30d',
@@ -69,6 +71,8 @@ export default class AuthController {
 
   async revalidateToken({ auth, response }: HttpContext) {
     const user = auth.use('api').getUserOrFail()
+    await user.load('company')
+
     const isExpired = auth.user?.currentAccessToken.isExpired()
 
     if (isExpired) {
@@ -110,6 +114,7 @@ export default class AuthController {
     const data = await request.validateUsing(resetPasswordValidator)
 
     const user = await userService.resetPassword(data.token, data.password)
+    await user.load('company')
 
     const token = await User.accessTokens.create(user, TokenUtil.getUserAbilities(user), {
       expiresIn: '30d',
@@ -127,6 +132,7 @@ export default class AuthController {
     const { token, userId } = await request.validateUsing(verifyEmail)
 
     const user = await userService.verify(userId, token)
+    await user.load('company')
 
     const accessToken = await User.accessTokens.create(user, TokenUtil.getUserAbilities(user), {
       expiresIn: '30d',
