@@ -24,7 +24,7 @@ export default class CompanyService {
     'bannerImage',
     'description',
     'location',
-    'daily_program',
+    'dailyProgram',
   ]
 
   /**

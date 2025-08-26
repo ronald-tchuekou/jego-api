@@ -90,6 +90,7 @@ export default class CompaniesController {
 
       const companyData = await request.validateUsing(updateCompanyValidator)
       const updatedCompany = await this.companyService.update(params.id, companyData)
+
       return response.ok({ data: updatedCompany })
     } catch (error) {
       return response.badRequest({
