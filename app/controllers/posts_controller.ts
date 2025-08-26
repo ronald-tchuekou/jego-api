@@ -194,15 +194,9 @@ export default class PostsController {
    */
   async getTotal({ request, response }: HttpContext) {
     try {
-      const { search = '', userId, status, type, category } = request.qs()
+      const { companyId } = request.qs()
 
-      const total = await this.postService.getTotal({
-        search,
-        userId,
-        status,
-        type,
-        category,
-      })
+      const total = await this.postService.getTotal(companyId)
 
       return response.ok({ count: total })
     } catch (error) {

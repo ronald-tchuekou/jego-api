@@ -411,23 +411,9 @@ export default class JobsController {
    */
   async getTotal({ request, response }: HttpContext) {
     try {
-      const {
-        search = '',
-        userId,
-        status,
-        companyName,
-        expiredOnly = false,
-        activeOnly = false,
-      } = request.qs()
+      const { companyId } = request.qs()
 
-      const total = await this.jobService.getTotal({
-        search,
-        userId,
-        status,
-        companyName,
-        expiredOnly: expiredOnly === 'true',
-        activeOnly: activeOnly === 'true',
-      })
+      const total = await this.jobService.getTotal(companyId)
 
       return response.ok({ count: total })
     } catch (error) {

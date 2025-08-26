@@ -126,43 +126,14 @@ export default class PostService {
    * @param filters - The filters
    * @returns The total number of posts
    */
-  async getTotal(
-    filters: {
-      search?: string
-      userId?: string
-      status?: string
-      type?: string
-      category?: string
-    } = {}
-  ): Promise<number> {
-    const { search = '', userId, status, type, category } = filters
-
+  async getTotal(companyId?: string): Promise<number> {
     let queryBuilder = Post.query()
 
-    // Apply search filter
-    if (search) {
-      queryBuilder = queryBuilder.where((query) => {
-        query.whereILike('title', `%${search}%`)
-        query.orWhereILike('description', `%${search}%`)
-        query.orWhereILike('category', `%${search}%`)
-      })
-    }
-
-    // Apply additional filters
-    if (userId) {
-      queryBuilder = queryBuilder.andWhere('userId', userId)
-    }
-
-    if (status) {
-      queryBuilder = queryBuilder.andWhere('status', status)
-    }
-
-    if (type) {
-      queryBuilder = queryBuilder.andWhere('type', type)
-    }
-
-    if (category) {
-      queryBuilder = queryBuilder.andWhere('category', category)
+    if (companyId) {
+      queryBuilder
+        .join('users', 'posts.user_id', 'users.id')
+        .join('companies', 'users.company_id', 'companies.id')
+        .where('companies.id', companyId)
     }
 
     const result = await queryBuilder.count('*', 'total')

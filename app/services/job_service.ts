@@ -156,60 +156,14 @@ export default class JobService {
    * @param filters - The filters
    * @returns The total number of jobs
    */
-  async getTotal(
-    filters: {
-      search?: string
-      userId?: string
-      status?: JobStatus
-      companyName?: string
-      expiredOnly?: boolean
-      activeOnly?: boolean
-    } = {}
-  ): Promise<number> {
-    const {
-      search = '',
-      userId,
-      status,
-      companyName,
-      expiredOnly = false,
-      activeOnly = false,
-    } = filters
-
+  async getTotal(companyId?: string): Promise<number> {
     let queryBuilder = Job.query()
 
-    // Apply search filter
-    if (search) {
-      queryBuilder = queryBuilder.where((query) => {
-        query.whereILike('title', `%${search}%`)
-        query.orWhereILike('description', `%${search}%`)
-        query.orWhereILike('company_name', `%${search}%`)
-        query.orWhereILike('company_email', `%${search}%`)
-        query.orWhereILike('company_city', `%${search}%`)
-      })
-    }
-
-    // Apply additional filters
-    if (userId) {
-      queryBuilder = queryBuilder.andWhere('userId', userId)
-    }
-
-    if (status) {
-      queryBuilder = queryBuilder.andWhere('status', status)
-    }
-
-    if (companyName) {
-      queryBuilder = queryBuilder.andWhereILike('company_name', `%${companyName}%`)
-    }
-
-    // Filter by expiration status
-    if (expiredOnly) {
-      queryBuilder = queryBuilder.andWhere('expires_at', '<', DateTime.now().toSQL())
-    }
-
-    if (activeOnly) {
-      queryBuilder = queryBuilder.andWhere((query) => {
-        query.whereNull('expires_at').orWhere('expires_at', '>', DateTime.now().toSQL())
-      })
+    if (companyId) {
+      queryBuilder
+        .join('users', 'jobs.user_id', 'users.id')
+        .join('companies', 'users.company_id', 'companies.id')
+        .where('companies.id', companyId)
     }
 
     const result = await queryBuilder.count('*', 'total')
