@@ -194,15 +194,9 @@ export default class PostsController {
    */
   async getTotal({ request, response }: HttpContext) {
     try {
-      const { search = '', userId, status, type, category } = request.qs()
+      const { companyId } = request.qs()
 
-      const total = await this.postService.getTotal({
-        search,
-        userId,
-        status,
-        type,
-        category,
-      })
+      const total = await this.postService.getTotal(companyId)
 
       return response.ok({ count: total })
     } catch (error) {
@@ -229,5 +223,20 @@ export default class PostsController {
     const postsCountPerDay = await this.postService.getPostCountPerDay(sDate, eDate)
 
     return response.ok({ data: postsCountPerDay, startDate: sDate, endDate: eDate })
+  }
+
+  /**
+   * Get posts by company id
+   */
+  async getByCompanyId({ params, request, response }: HttpContext) {
+    const { page = 1, limit = 10, search = '' } = request.qs()
+
+    const posts = await this.postService.getByCompanyId(params.companyId, {
+      page,
+      limit,
+      search,
+    })
+
+    return response.ok(posts)
   }
 }

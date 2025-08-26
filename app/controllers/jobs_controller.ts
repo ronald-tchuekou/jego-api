@@ -379,27 +379,22 @@ export default class JobsController {
   /**
    * Search jobs by company
    */
-  async searchByCompany({ request, response }: HttpContext) {
+  async getJobsByCompanyId({ request, response, params }: HttpContext) {
     try {
-      const {
-        company: companyQuery,
-        page = 1,
-        limit = 10,
-        status,
-        activeOnly = false,
-      } = request.qs()
+      const companyId = params.companyId
+      const { search, page = 1, limit = 10, status } = request.qs()
 
-      if (!companyQuery) {
+      if (!companyId) {
         return response.badRequest({
           message: 'Le paramètre company est requis pour la recherche.',
         })
       }
 
-      const jobs = await this.jobService.searchByCompany(companyQuery, {
+      const jobs = await this.jobService.searchByCompany(companyId, {
         page,
         limit,
         status,
-        activeOnly: activeOnly === 'true',
+        search,
       })
 
       return response.ok(jobs)
@@ -416,23 +411,9 @@ export default class JobsController {
    */
   async getTotal({ request, response }: HttpContext) {
     try {
-      const {
-        search = '',
-        userId,
-        status,
-        companyName,
-        expiredOnly = false,
-        activeOnly = false,
-      } = request.qs()
+      const { companyId } = request.qs()
 
-      const total = await this.jobService.getTotal({
-        search,
-        userId,
-        status,
-        companyName,
-        expiredOnly: expiredOnly === 'true',
-        activeOnly: activeOnly === 'true',
-      })
+      const total = await this.jobService.getTotal(companyId)
 
       return response.ok({ count: total })
     } catch (error) {

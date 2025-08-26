@@ -47,8 +47,8 @@ export const editJob = Bouncer.ability((user: User, job: Job) => {
   // Admins can edit any job
   if (user.role === UserRole.ADMIN) return true
 
-  // Users can edit their own jobs
-  if (user.id === job.userId) return true
+  // Employees can edit their own jobs
+  if (user.companyId === job.user.companyId) return true
 
   return AuthorizationResponse.deny(
     "Vous n'avez pas les permissions pour modifier cet emploi.",
@@ -68,8 +68,8 @@ export const deleteJob = Bouncer.ability((user: User, job: Job) => {
   // Admins can delete any job
   if (user.role === UserRole.ADMIN) return true
 
-  // Users can delete their own jobs
-  if (user.id === job.userId) return true
+  // Employees can delete their own jobs
+  if (user.companyId === job.user.companyId) return true
 
   return AuthorizationResponse.deny(
     "Vous n'avez pas les permissions pour supprimer cet emploi.",
@@ -89,8 +89,8 @@ export const manageJobStatus = Bouncer.ability((user: User, job: Job) => {
   // Admins can manage any job status
   if (user.role === UserRole.ADMIN) return true
 
-  // Users can manage their own job status
-  if (user.id === job.userId) return true
+  // Employees can manage their own job status
+  if (user.companyId === job.user.companyId) return true
 
   return AuthorizationResponse.deny(
     "Vous n'avez pas les permissions pour modifier le statut de cet emploi.",
