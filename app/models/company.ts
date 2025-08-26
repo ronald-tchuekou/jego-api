@@ -84,7 +84,7 @@ export default class Company extends BaseModel {
   declare location: { lat?: number; lng?: number } | null
 
   @column()
-  declare daily_program: Record<DayForProgram, { open?: string; close?: string }> | null
+  declare dailyProgram: Record<DayForProgram, { open?: string; close?: string }> | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
