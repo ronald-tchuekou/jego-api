@@ -22,3 +22,8 @@ Content-Type: application/json
 ### Toggle block user
 PATCH http://localhost:3333/v1/users/70f6dec3-90e7-48ab-b89f-ee3415039170/toggle-block
 Content-Type: application/json
+
+
+### Get jobs by company id
+GET http://localhost:3333/v1/jobs/company/7b8fd03c-5fd4-458d-983f-55c631dc1906
+Content-Type: application/json

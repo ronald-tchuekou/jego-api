@@ -230,4 +230,19 @@ export default class PostsController {
 
     return response.ok({ data: postsCountPerDay, startDate: sDate, endDate: eDate })
   }
+
+  /**
+   * Get posts by company id
+   */
+  async getByCompanyId({ params, request, response }: HttpContext) {
+    const { page = 1, limit = 10, search = '' } = request.qs()
+
+    const posts = await this.postService.getByCompanyId(params.companyId, {
+      page,
+      limit,
+      search,
+    })
+
+    return response.ok(posts)
+  }
 }
