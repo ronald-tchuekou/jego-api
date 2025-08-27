@@ -122,7 +122,10 @@ export default class JobApplicationService {
           jobQuery.whereILike('title', `%${search}%`)
         })
         .orWhereHas('user', (userQuery) => {
-          userQuery.whereILike('name', `%${search}%`).orWhereILike('email', `%${search}%`)
+          userQuery
+            .whereILike('first_name', `%${search}%`)
+            .orWhereILike('last_name', `%${search}%`)
+            .orWhereILike('email', `%${search}%`)
         })
     }
 
@@ -515,14 +518,24 @@ export default class JobApplicationService {
   async getCompanyJobApplications(
     companyId: string,
     filters: {
+      search?: string
       page?: number
       limit?: number
       status?: JobApplicationStatus
     } = {}
   ) {
-    const { page = 1, limit = 10, status } = filters
+    const { search = '', page = 1, limit = 10, status } = filters
 
     let queryBuilder = JobApplication.query()
+      .whereHas('job', (jobQuery) => {
+        jobQuery.whereILike('title', `%${search}%`)
+      })
+      .orWhereHas('user', (userQuery) => {
+        userQuery
+          .whereILike('first_name', `%${search}%`)
+          .orWhereILike('last_name', `%${search}%`)
+          .orWhereILike('email', `%${search}%`)
+      })
       .preload('job')
       .preload('user')
       .whereHas('job', (jobQuery) => {
