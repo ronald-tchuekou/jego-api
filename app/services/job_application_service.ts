@@ -113,21 +113,19 @@ export default class JobApplicationService {
         jobQuery.preload('user')
       })
       .preload('user')
+      .where((query) => {
+        query
+          .whereHas('user', (userQuery) => {
+            userQuery
+              .whereILike('first_name', `%${search}%`)
+              .orWhereILike('last_name', `%${search}%`)
+              .orWhereILike('email', `%${search}%`)
+          })
+          .orWhereHas('job', (jobQuery) => {
+            jobQuery.whereILike('title', `%${search}%`)
+          })
+      })
       .orderBy('created_at', 'asc')
-
-    // Apply search filter (search in job title and user name)
-    if (search) {
-      queryBuilder = queryBuilder
-        .whereHas('job', (jobQuery) => {
-          jobQuery.whereILike('title', `%${search}%`)
-        })
-        .orWhereHas('user', (userQuery) => {
-          userQuery
-            .whereILike('first_name', `%${search}%`)
-            .orWhereILike('last_name', `%${search}%`)
-            .orWhereILike('email', `%${search}%`)
-        })
-    }
 
     // Apply additional filters
     if (userId) {
@@ -144,7 +142,7 @@ export default class JobApplicationService {
 
     // Filter by company (through job's user's company)
     if (companyId) {
-      queryBuilder = queryBuilder.whereHas('job', (jobQuery) => {
+      queryBuilder = queryBuilder.andWhereHas('job', (jobQuery) => {
         jobQuery.whereHas('user', (userQuery) => {
           userQuery.where('companyId', companyId)
         })
@@ -527,21 +525,24 @@ export default class JobApplicationService {
     const { search = '', page = 1, limit = 10, status } = filters
 
     let queryBuilder = JobApplication.query()
-      .whereHas('job', (jobQuery) => {
-        jobQuery.whereILike('title', `%${search}%`)
-      })
-      .orWhereHas('user', (userQuery) => {
-        userQuery
-          .whereILike('first_name', `%${search}%`)
-          .orWhereILike('last_name', `%${search}%`)
-          .orWhereILike('email', `%${search}%`)
-      })
       .preload('job')
       .preload('user')
       .whereHas('job', (jobQuery) => {
         jobQuery.whereHas('user', (userQuery) => {
           userQuery.where('companyId', companyId)
         })
+      })
+      .andWhere((query) => {
+        query
+          .whereHas('user', (userQuery) => {
+            userQuery
+              .whereILike('first_name', `%${search}%`)
+              .orWhereILike('last_name', `%${search}%`)
+              .orWhereILike('email', `%${search}%`)
+          })
+          .orWhereHas('job', (jobQuery) => {
+            jobQuery.whereILike('title', `%${search}%`)
+          })
       })
       .orderBy('created_at', 'asc')
 

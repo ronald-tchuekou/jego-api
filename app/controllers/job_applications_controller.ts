@@ -424,7 +424,7 @@ export default class JobApplicationsController {
   async getCompanyApplications({ params, request, auth, response }: HttpContext) {
     try {
       const user = auth.getUserOrFail()
-      const { page = 1, limit = 10, status } = request.qs()
+      const { page = 1, limit = 10, search, status } = request.qs()
 
       // Check if user belongs to the company or is admin
       if (user.role !== UserRole.ADMIN && user.companyId !== params.companyId) {
@@ -436,6 +436,7 @@ export default class JobApplicationsController {
       const applications = await this.jobApplicationService.getCompanyJobApplications(
         params.companyId,
         {
+          search,
           page,
           limit,
           status,
