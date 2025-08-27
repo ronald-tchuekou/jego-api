@@ -1,4 +1,4 @@
-import { BaseModel, belongsTo, column, computed, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import JobApplication from './job_application.js'
@@ -69,9 +69,4 @@ export default class Job extends BaseModel {
 
   @hasMany(() => JobApplication)
   declare applications: HasMany<typeof JobApplication>
-
-  @computed()
-  get applicationCount(): number {
-    return this.applications.length
-  }
 }

@@ -50,7 +50,7 @@ export default class JobService {
 
     // Set other fields from data
     this.fields.forEach((field) => {
-      if (field !== 'userId' && data[field] !== undefined && field !== 'applicationCount') {
+      if (field !== 'userId' && data[field] !== undefined) {
         job[field] = data[field] as never
       }
     })
@@ -72,7 +72,7 @@ export default class JobService {
     const job = await Job.findOrFail(jobId)
 
     this.fields.forEach((field) => {
-      if (field !== 'userId' && data[field] !== undefined && field !== 'applicationCount') {
+      if (field !== 'userId' && data[field] !== undefined) {
         job[field] = data[field] as never
       }
     })
