@@ -50,13 +50,14 @@ export default class JobService {
 
     // Set other fields from data
     this.fields.forEach((field) => {
-      if (field !== 'userId' && data[field] !== undefined) {
+      if (field !== 'userId' && data[field] !== undefined && field !== 'applicationCount') {
         job[field] = data[field] as never
       }
     })
 
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
 
     return savedJob
   }
@@ -72,13 +73,14 @@ export default class JobService {
     const job = await Job.findOrFail(jobId)
 
     this.fields.forEach((field) => {
-      if (field !== 'userId' && data[field] !== undefined) {
+      if (field !== 'userId' && data[field] !== undefined && field !== 'applicationCount') {
         job[field] = data[field] as never
       }
     })
 
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
 
     return savedJob
   }
@@ -109,7 +111,10 @@ export default class JobService {
       activeOnly = false,
     } = filters
 
-    let queryBuilder = Job.query().preload('user').orderBy('created_at', 'desc')
+    let queryBuilder = Job.query()
+      .preload('user')
+      .preload('applications')
+      .orderBy('created_at', 'desc')
 
     // Apply search filter
     if (search) {
@@ -178,7 +183,7 @@ export default class JobService {
    * @returns The job with user relationship loaded
    */
   async findById(jobId: string): Promise<Job | null> {
-    return Job.query().where('id', jobId).preload('user').first()
+    return Job.query().where('id', jobId).preload('user').preload('applications').first()
   }
 
   /**
@@ -202,6 +207,7 @@ export default class JobService {
     let queryBuilder = Job.query()
       .where('userId', userId)
       .preload('user')
+      .preload('applications')
       .orderBy('created_at', 'desc')
 
     // Apply additional filters
@@ -248,6 +254,7 @@ export default class JobService {
     job.status = job.status === JobStatus.OPEN ? JobStatus.CLOSED : JobStatus.OPEN
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
     return savedJob
   }
 
@@ -262,6 +269,7 @@ export default class JobService {
     job.status = JobStatus.CLOSED
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
     return savedJob
   }
 
@@ -276,6 +284,7 @@ export default class JobService {
     job.status = JobStatus.OPEN
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
     return savedJob
   }
 
@@ -291,6 +300,7 @@ export default class JobService {
     job.expiresAt = expiresAt ? DateTime.fromJSDate(expiresAt) : null
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
     return savedJob
   }
 
@@ -311,6 +321,7 @@ export default class JobService {
     let queryBuilder = Job.query()
       .where('expires_at', '<', DateTime.now().toSQL())
       .preload('user')
+      .preload('applications')
       .orderBy('expires_at', 'asc')
 
     if (userId) {
@@ -342,6 +353,7 @@ export default class JobService {
         query.whereNull('expires_at').orWhere('expires_at', '>', DateTime.now().toSQL())
       })
       .preload('user')
+      .preload('applications')
       .orderBy('created_at', 'desc')
 
     if (userId) {
@@ -491,6 +503,7 @@ export default class JobService {
         query.orWhereILike('company_address', `%${search}%`)
       })
       .preload('user')
+      .preload('applications')
       .orderBy('created_at', 'desc')
 
     if (status) {
