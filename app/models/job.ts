@@ -1,6 +1,7 @@
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import JobApplication from './job_application.js'
 import User from './user.js'
 
 export enum JobStatus {
@@ -65,4 +66,7 @@ export default class Job extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  @hasMany(() => JobApplication)
+  declare applications: HasMany<typeof JobApplication>
 }
