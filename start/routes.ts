@@ -21,6 +21,7 @@ const CompanyReviewsController = () => import('#controllers/company_reviews_cont
 const PostsController = () => import('#controllers/posts_controller')
 const FilesController = () => import('#controllers/files_controller')
 const JobsController = () => import('#controllers/jobs_controller')
+const JobApplicationsController = () => import('#controllers/job_applications_controller')
 
 router.get('', async () => {
   return {
@@ -236,6 +237,34 @@ router
         router.get(':id', [JobsController, 'show'])
       })
       .prefix('jobs')
+
+    /**
+     * Job Applications routes
+     */
+    router
+      .group(() => {
+        // Protected
+        router
+          .group(() => {
+            router.get('', [JobApplicationsController, 'index'])
+            router.post('', [JobApplicationsController, 'store'])
+            router.put(':id', [JobApplicationsController, 'update'])
+            router.delete(':id', [JobApplicationsController, 'destroy'])
+            router.get('count', [JobApplicationsController, 'getTotal'])
+            router.get('count-per-day', [JobApplicationsController, 'getApplicationsCountPerDay'])
+            router.get('stats', [JobApplicationsController, 'getStatistics'])
+            router.get('recent', [JobApplicationsController, 'getRecent'])
+            router.get('user/:userId', [JobApplicationsController, 'getByUser'])
+            router.get('user/:userId/stats', [JobApplicationsController, 'getUserStatistics'])
+            router.get('job/:jobId', [JobApplicationsController, 'getByJob'])
+            router.get('job/:jobId/stats', [JobApplicationsController, 'getJobStatistics'])
+            router.get('job/:jobId/check', [JobApplicationsController, 'hasApplied'])
+            router.get('company/:companyId', [JobApplicationsController, 'getCompanyApplications'])
+            router.get(':id', [JobApplicationsController, 'show'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('job-applications')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })

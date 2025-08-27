@@ -202,7 +202,13 @@ export default class JobApplicationService {
    * @returns The application with job and user relationships loaded
    */
   async findById(applicationId: string): Promise<JobApplication | null> {
-    return JobApplication.query().where('id', applicationId).preload('job').preload('user').first()
+    return JobApplication.query()
+      .where('id', applicationId)
+      .preload('job', (jobQuery) => {
+        jobQuery.preload('user')
+      })
+      .preload('user')
+      .first()
   }
 
   /**
@@ -475,12 +481,29 @@ export default class JobApplicationService {
    * @param limit - The number of recent applications to retrieve
    * @returns Recent job applications
    */
-  async getRecentApplications(limit: number = 10): Promise<JobApplication[]> {
-    return JobApplication.query()
+  async getRecentApplications(filters: {
+    limit: number
+    companyId?: string
+  }): Promise<JobApplication[]> {
+    const { limit = 10, companyId } = filters
+
+    let queryBuilder = JobApplication.query()
       .preload('job')
       .preload('user')
       .orderBy('created_at', 'asc')
       .limit(limit)
+
+    if (companyId) {
+      queryBuilder = queryBuilder.whereHas('job', (jobQuery) => {
+        jobQuery.whereHas('user', (userQuery) => {
+          userQuery.where('companyId', companyId)
+        })
+      })
+    }
+
+    const applications = await queryBuilder.paginate(1, limit)
+
+    return applications
   }
 
   /**
