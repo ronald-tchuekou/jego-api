@@ -4,6 +4,13 @@ import { DateTime } from 'luxon'
 import Company from './company.js'
 import User from './user.js'
 
+export enum AppointmentStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELLED = 'cancelled',
+  COMPLETED = 'completed',
+}
+
 export default class Appointment extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
@@ -21,7 +28,7 @@ export default class Appointment extends BaseModel {
   declare time: string
 
   @column()
-  declare status: string
+  declare status: AppointmentStatus
 
   @column()
   declare subject: string
