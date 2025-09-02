@@ -125,7 +125,7 @@ export default class JobApplicationService {
             jobQuery.whereILike('title', `%${search}%`)
           })
       })
-      .orderBy('created_at', 'asc')
+      .orderBy('created_at', 'desc')
 
     // Apply additional filters
     if (userId) {
@@ -263,7 +263,7 @@ export default class JobApplicationService {
       .where('jobId', jobId)
       .preload('job')
       .preload('user')
-      .orderBy('created_at', 'asc')
+      .orderBy('created_at', 'desc')
 
     if (status) {
       queryBuilder = queryBuilder.andWhere('status', status)
@@ -491,7 +491,7 @@ export default class JobApplicationService {
     let queryBuilder = JobApplication.query()
       .preload('job')
       .preload('user')
-      .orderBy('created_at', 'asc')
+      .orderBy('created_at', 'desc')
       .limit(limit)
 
     if (companyId) {
@@ -544,7 +544,7 @@ export default class JobApplicationService {
             jobQuery.whereILike('title', `%${search}%`)
           })
       })
-      .orderBy('created_at', 'asc')
+      .orderBy('created_at', 'desc')
 
     if (status) {
       queryBuilder = queryBuilder.andWhere('status', status)
