@@ -56,10 +56,7 @@ export default class AppointmentsController {
 
       const appointments = await this.appointmentService.getAll(filters)
 
-      return response.ok({
-        message: 'Appointments retrieved successfully',
-        data: appointments,
-      })
+      return response.ok(appointments)
     } catch (error) {
       return response.badRequest({
         message: 'Failed to retrieve appointments',
@@ -212,7 +209,7 @@ export default class AppointmentsController {
 
       return response.ok({
         message: 'Total appointments count retrieved successfully',
-        data: { total },
+        count: total,
       })
     } catch (error) {
       return response.badRequest({
@@ -291,10 +288,7 @@ export default class AppointmentsController {
         dateTo,
       })
 
-      return response.ok({
-        message: 'Company appointments retrieved successfully',
-        data: appointments,
-      })
+      return response.ok(appointments)
     } catch (error) {
       return response.badRequest({
         message: 'Failed to retrieve company appointments',
@@ -386,10 +380,7 @@ export default class AppointmentsController {
 
       const appointments = await this.appointmentService.getUpcomingAppointments(filters)
 
-      return response.ok({
-        message: 'Upcoming appointments retrieved successfully',
-        data: appointments,
-      })
+      return response.ok(appointments)
     } catch (error) {
       return response.badRequest({
         message: 'Failed to retrieve upcoming appointments',
@@ -417,10 +408,7 @@ export default class AppointmentsController {
 
       const statistics = await this.appointmentService.getStatistics(filterCompanyId)
 
-      return response.ok({
-        message: 'Appointment statistics retrieved successfully',
-        data: statistics,
-      })
+      return response.ok({ data: statistics })
     } catch (error) {
       return response.badRequest({
         message: 'Failed to retrieve appointment statistics',
