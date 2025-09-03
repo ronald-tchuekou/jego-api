@@ -22,6 +22,7 @@ const PostsController = () => import('#controllers/posts_controller')
 const FilesController = () => import('#controllers/files_controller')
 const JobsController = () => import('#controllers/jobs_controller')
 const JobApplicationsController = () => import('#controllers/job_applications_controller')
+const AppointmentsController = () => import('#controllers/appointments_controller')
 
 router.get('', async () => {
   return {
@@ -265,6 +266,31 @@ router
           .middleware([middleware.auth()])
       })
       .prefix('job-applications')
+
+    /**
+     * Appointments routes
+     */
+    router
+      .group(() => {
+        // Protected
+        router
+          .group(() => {
+            router.get('', [AppointmentsController, 'index'])
+            router.post('', [AppointmentsController, 'store'])
+            router.put(':id', [AppointmentsController, 'update'])
+            router.delete(':id', [AppointmentsController, 'destroy'])
+            router.get('count', [AppointmentsController, 'getTotal'])
+            router.get('upcoming', [AppointmentsController, 'getUpcoming'])
+            router.get('stats', [AppointmentsController, 'getStatistics'])
+            router.get('user/:userId', [AppointmentsController, 'getByUser'])
+            router.get('company/:companyId', [AppointmentsController, 'getByCompany'])
+            router.patch(':id/status', [AppointmentsController, 'updateStatus'])
+            router.patch(':id/mark-read', [AppointmentsController, 'markAsRead'])
+            router.get(':id', [AppointmentsController, 'show'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('appointments')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })

@@ -6,6 +6,7 @@ import User from '#models/user'
 import { BaseModel, belongsTo, column, hasMany, hasManyThrough } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany, HasManyThrough } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import Appointment from './appointment.js'
 import CompanyAppointmentRequest from './company_appointment_request.js'
 import CompanyDoc from './company_doc.js'
 import CompanyReview from './company_review.js'
@@ -118,4 +119,7 @@ export default class Company extends BaseModel {
 
   @hasManyThrough([() => Job, () => User])
   declare jobs: HasManyThrough<typeof Job>
+
+  @hasMany(() => Appointment)
+  declare appointments: HasMany<typeof Appointment>
 }
