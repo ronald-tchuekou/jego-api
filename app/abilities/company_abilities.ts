@@ -17,12 +17,12 @@ import User, { UserRole } from '#models/user'
 import { AuthorizationResponse, Bouncer } from '@adonisjs/bouncer'
 
 export const updateCompany = Bouncer.ability((user: User, company: Company) => {
-  const accessToken = user.currentAccessToken
-
-  if (accessToken?.allows('company:update')) {
-    if (user.role === UserRole.ADMIN) return true
-    if (user.role === UserRole.COMPANY_ADMIN && user.companyId === company.id) return true
-  }
+  if (user.role === UserRole.ADMIN) return true
+  if (
+    (user.role === UserRole.COMPANY_ADMIN || user.role === UserRole.COMPANY_AGENT) &&
+    user.companyId === company.id
+  )
+    return true
 
   return AuthorizationResponse.deny(
     "Vous n'avez pas les permissions pour modifier une entreprise.",

@@ -27,7 +27,7 @@ export const storeCompanyValidator = vine.compile(
         lng: vine.number().optional(),
       })
       .optional(),
-    daily_program: vine
+    dailyProgram: vine
       .object({
         Lundi: vine.object({
           open: vine.string().trim().optional(),
@@ -89,7 +89,7 @@ export const updateCompanyValidator = vine.compile(
         lng: vine.number().optional(),
       })
       .optional(),
-    daily_program: vine
+    dailyProgram: vine
       .object({
         Lundi: vine.object({
           open: vine.string().trim().optional(),

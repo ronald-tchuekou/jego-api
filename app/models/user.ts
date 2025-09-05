@@ -9,6 +9,7 @@ import hash from '@adonisjs/core/services/hash'
 import { BaseModel, belongsTo, column, computed, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import Appointment from './appointment.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -101,6 +102,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => Job)
   declare jobs: HasMany<typeof Job>
+
+  @hasMany(() => Appointment)
+  declare appointments: HasMany<typeof Appointment>
 
   currentAccessToken?: AccessToken
 }

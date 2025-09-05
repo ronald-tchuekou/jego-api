@@ -50,13 +50,14 @@ export default class JobService {
 
     // Set other fields from data
     this.fields.forEach((field) => {
-      if (field !== 'userId' && data[field] !== undefined) {
+      if (field !== 'userId' && data[field] !== undefined && field !== 'applicationCount') {
         job[field] = data[field] as never
       }
     })
 
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
 
     return savedJob
   }
@@ -72,13 +73,14 @@ export default class JobService {
     const job = await Job.findOrFail(jobId)
 
     this.fields.forEach((field) => {
-      if (field !== 'userId' && data[field] !== undefined) {
+      if (field !== 'userId' && data[field] !== undefined && field !== 'applicationCount') {
         job[field] = data[field] as never
       }
     })
 
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
 
     return savedJob
   }
@@ -109,16 +111,19 @@ export default class JobService {
       activeOnly = false,
     } = filters
 
-    let queryBuilder = Job.query().preload('user').orderBy('createdAt', 'desc')
+    let queryBuilder = Job.query()
+      .preload('user')
+      .preload('applications')
+      .orderBy('created_at', 'desc')
 
     // Apply search filter
     if (search) {
       queryBuilder = queryBuilder.where((query) => {
         query.whereILike('title', `%${search}%`)
         query.orWhereILike('description', `%${search}%`)
-        query.orWhereILike('companyName', `%${search}%`)
-        query.orWhereILike('companyEmail', `%${search}%`)
-        query.orWhereILike('companyCity', `%${search}%`)
+        query.orWhereILike('company_name', `%${search}%`)
+        query.orWhereILike('company_email', `%${search}%`)
+        query.orWhereILike('company_city', `%${search}%`)
       })
     }
 
@@ -132,17 +137,17 @@ export default class JobService {
     }
 
     if (companyName) {
-      queryBuilder = queryBuilder.andWhereILike('companyName', `%${companyName}%`)
+      queryBuilder = queryBuilder.andWhereILike('company_name', `%${companyName}%`)
     }
 
     // Filter by expiration status
     if (expiredOnly) {
-      queryBuilder = queryBuilder.andWhere('expiresAt', '<', DateTime.now().toSQL())
+      queryBuilder = queryBuilder.andWhere('expires_at', '<', DateTime.now().toSQL())
     }
 
     if (activeOnly) {
       queryBuilder = queryBuilder.andWhere((query) => {
-        query.whereNull('expiresAt').orWhere('expiresAt', '>', DateTime.now().toSQL())
+        query.whereNull('expires_at').orWhere('expires_at', '>', DateTime.now().toSQL())
       })
     }
 
@@ -156,60 +161,14 @@ export default class JobService {
    * @param filters - The filters
    * @returns The total number of jobs
    */
-  async getTotal(
-    filters: {
-      search?: string
-      userId?: string
-      status?: JobStatus
-      companyName?: string
-      expiredOnly?: boolean
-      activeOnly?: boolean
-    } = {}
-  ): Promise<number> {
-    const {
-      search = '',
-      userId,
-      status,
-      companyName,
-      expiredOnly = false,
-      activeOnly = false,
-    } = filters
-
+  async getTotal(companyId?: string): Promise<number> {
     let queryBuilder = Job.query()
 
-    // Apply search filter
-    if (search) {
-      queryBuilder = queryBuilder.where((query) => {
-        query.whereILike('title', `%${search}%`)
-        query.orWhereILike('description', `%${search}%`)
-        query.orWhereILike('companyName', `%${search}%`)
-        query.orWhereILike('companyEmail', `%${search}%`)
-        query.orWhereILike('companyCity', `%${search}%`)
-      })
-    }
-
-    // Apply additional filters
-    if (userId) {
-      queryBuilder = queryBuilder.andWhere('userId', userId)
-    }
-
-    if (status) {
-      queryBuilder = queryBuilder.andWhere('status', status)
-    }
-
-    if (companyName) {
-      queryBuilder = queryBuilder.andWhereILike('companyName', `%${companyName}%`)
-    }
-
-    // Filter by expiration status
-    if (expiredOnly) {
-      queryBuilder = queryBuilder.andWhere('expiresAt', '<', DateTime.now().toSQL())
-    }
-
-    if (activeOnly) {
-      queryBuilder = queryBuilder.andWhere((query) => {
-        query.whereNull('expiresAt').orWhere('expiresAt', '>', DateTime.now().toSQL())
-      })
+    if (companyId) {
+      queryBuilder
+        .join('users', 'jobs.user_id', 'users.id')
+        .join('companies', 'users.company_id', 'companies.id')
+        .where('companies.id', companyId)
     }
 
     const result = await queryBuilder.count('*', 'total')
@@ -224,7 +183,7 @@ export default class JobService {
    * @returns The job with user relationship loaded
    */
   async findById(jobId: string): Promise<Job | null> {
-    return Job.query().where('id', jobId).preload('user').first()
+    return Job.query().where('id', jobId).preload('user').preload('applications').first()
   }
 
   /**
@@ -248,7 +207,8 @@ export default class JobService {
     let queryBuilder = Job.query()
       .where('userId', userId)
       .preload('user')
-      .orderBy('createdAt', 'desc')
+      .preload('applications')
+      .orderBy('created_at', 'desc')
 
     // Apply additional filters
     if (status) {
@@ -257,12 +217,12 @@ export default class JobService {
 
     // Filter by expiration status
     if (expiredOnly) {
-      queryBuilder = queryBuilder.andWhere('expiresAt', '<', DateTime.now().toSQL())
+      queryBuilder = queryBuilder.andWhere('expires_at', '<', DateTime.now().toSQL())
     }
 
     if (activeOnly) {
       queryBuilder = queryBuilder.andWhere((query) => {
-        query.whereNull('expiresAt').orWhere('expiresAt', '>', DateTime.now().toSQL())
+        query.whereNull('expires_at').orWhere('expires_at', '>', DateTime.now().toSQL())
       })
     }
 
@@ -294,6 +254,7 @@ export default class JobService {
     job.status = job.status === JobStatus.OPEN ? JobStatus.CLOSED : JobStatus.OPEN
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
     return savedJob
   }
 
@@ -308,6 +269,7 @@ export default class JobService {
     job.status = JobStatus.CLOSED
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
     return savedJob
   }
 
@@ -322,6 +284,7 @@ export default class JobService {
     job.status = JobStatus.OPEN
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
     return savedJob
   }
 
@@ -337,6 +300,7 @@ export default class JobService {
     job.expiresAt = expiresAt ? DateTime.fromJSDate(expiresAt) : null
     const savedJob = await job.save()
     await savedJob.load('user')
+    await savedJob.load('applications')
     return savedJob
   }
 
@@ -355,9 +319,10 @@ export default class JobService {
     const { page = 1, limit = 10, userId } = filters
 
     let queryBuilder = Job.query()
-      .where('expiresAt', '<', DateTime.now().toSQL())
+      .where('expires_at', '<', DateTime.now().toSQL())
       .preload('user')
-      .orderBy('expiresAt', 'asc')
+      .preload('applications')
+      .orderBy('expires_at', 'asc')
 
     if (userId) {
       queryBuilder = queryBuilder.andWhere('userId', userId)
@@ -385,10 +350,11 @@ export default class JobService {
 
     let queryBuilder = Job.query()
       .where((query) => {
-        query.whereNull('expiresAt').orWhere('expiresAt', '>', DateTime.now().toSQL())
+        query.whereNull('expires_at').orWhere('expires_at', '>', DateTime.now().toSQL())
       })
       .preload('user')
-      .orderBy('createdAt', 'desc')
+      .preload('applications')
+      .orderBy('created_at', 'desc')
 
     if (userId) {
       queryBuilder = queryBuilder.andWhere('userId', userId)
@@ -514,35 +480,34 @@ export default class JobService {
    * @returns Jobs matching the company search
    */
   async searchByCompany(
-    companyQuery: string,
+    companyId: string,
     filters: {
+      search?: string
       page?: number
       limit?: number
       status?: JobStatus
-      activeOnly?: boolean
     } = {}
   ) {
-    const { page = 1, limit = 10, status, activeOnly = false } = filters
+    const { page = 1, limit = 10, status, search = '' } = filters
 
     let queryBuilder = Job.query()
-      .where((query) => {
-        query.whereILike('companyName', `%${companyQuery}%`)
-        query.orWhereILike('companyEmail', `%${companyQuery}%`)
-        query.orWhereILike('companyWebsite', `%${companyQuery}%`)
-        query.orWhereILike('companyCity', `%${companyQuery}%`)
-        query.orWhereILike('companyAddress', `%${companyQuery}%`)
+      .select('jobs.*')
+      .join('users', 'jobs.user_id', 'users.id')
+      .join('companies', 'users.company_id', 'companies.id')
+      .where('companies.id', companyId)
+      .andWhere((query) => {
+        query.whereILike('company_name', `%${search}%`)
+        query.orWhereILike('company_email', `%${search}%`)
+        query.orWhereILike('company_website', `%${search}%`)
+        query.orWhereILike('company_city', `%${search}%`)
+        query.orWhereILike('company_address', `%${search}%`)
       })
       .preload('user')
-      .orderBy('createdAt', 'desc')
+      .preload('applications')
+      .orderBy('created_at', 'desc')
 
     if (status) {
       queryBuilder = queryBuilder.andWhere('status', status)
-    }
-
-    if (activeOnly) {
-      queryBuilder = queryBuilder.andWhere((query) => {
-        query.whereNull('expiresAt').orWhere('expiresAt', '>', DateTime.now().toSQL())
-      })
     }
 
     const jobs = await queryBuilder.paginate(page, limit)

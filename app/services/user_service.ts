@@ -54,6 +54,7 @@ export default class UserService {
     }
 
     const savedUser = await user.save()
+    await savedUser.load('company')
 
     UserRegistered.dispatch(savedUser)
 
@@ -77,6 +78,7 @@ export default class UserService {
     })
 
     const savedUser = await user.save()
+    await savedUser.load('company')
 
     UserUpdated.dispatch(savedUser)
 
@@ -108,6 +110,7 @@ export default class UserService {
     user.verifiedAt = DateTime.now()
 
     user = await user.save()
+    await user.load('company')
 
     // Delete the used token
     await userTokenService.delete(token)
@@ -120,6 +123,7 @@ export default class UserService {
 
   async verifyNewEmail(userId: string, token: string): Promise<User> {
     let user = await User.findOrFail(userId)
+    await user.load('company')
 
     if (!user.updateEmailRequest) {
       throw new Error("Aucune demande de mise à jour d'email trouvée.")
@@ -141,6 +145,7 @@ export default class UserService {
     user.lastLoginAt = DateTime.now()
 
     user = await user.save()
+    await user.load('company')
 
     return user
   }
@@ -152,7 +157,7 @@ export default class UserService {
    */
   async requestPasswordReset(email: string): Promise<void> {
     // Find user by email - don't throw error for security reasons
-    const user = await User.query().where('email', email).first()
+    const user = await User.query().preload('company').where('email', email).first()
 
     if (!user) {
       // Don't reveal if email exists or not for security
@@ -190,6 +195,7 @@ export default class UserService {
     // Update the password
     user.password = newPassword
     user = await user.save()
+    await user.load('company')
 
     // Delete the used token
     await userTokenService.delete(token)
@@ -307,7 +313,10 @@ export default class UserService {
   async toggleBlockUser(userId: string): Promise<User> {
     const user = await User.findOrFail(userId)
     user.blockedAt = user.blockedAt ? null : DateTime.now()
+
     await user.save()
+    await user.load('company')
+
     return user
   }
 

@@ -21,6 +21,8 @@ const CompanyReviewsController = () => import('#controllers/company_reviews_cont
 const PostsController = () => import('#controllers/posts_controller')
 const FilesController = () => import('#controllers/files_controller')
 const JobsController = () => import('#controllers/jobs_controller')
+const JobApplicationsController = () => import('#controllers/job_applications_controller')
+const AppointmentsController = () => import('#controllers/appointments_controller')
 
 router.get('', async () => {
   return {
@@ -189,6 +191,7 @@ router
         router.get('count-per-day', [PostsController, 'getPostsCountPerDay'])
         router.get(':id', [PostsController, 'show'])
         router.get('user/:userId', [PostsController, 'getByUser'])
+        router.get('company/:companyId', [PostsController, 'getByCompanyId'])
         router.get('category/:category', [PostsController, 'getByCategory'])
       })
       .prefix('posts')
@@ -230,10 +233,64 @@ router
         router.get('expired', [JobsController, 'getExpired'])
         router.get('active', [JobsController, 'getActive'])
         router.get('user/:userId', [JobsController, 'getByUser'])
-        router.get('company/:companyId', [JobsController, 'searchByCompany'])
+        router.get('company/:companyId', [JobsController, 'getJobsByCompanyId'])
         router.get('stats', [JobsController, 'getStatistics'])
+        router.get(':id', [JobsController, 'show'])
       })
       .prefix('jobs')
+
+    /**
+     * Job Applications routes
+     */
+    router
+      .group(() => {
+        // Protected
+        router
+          .group(() => {
+            router.get('', [JobApplicationsController, 'index'])
+            router.post('', [JobApplicationsController, 'store'])
+            router.put(':id', [JobApplicationsController, 'update'])
+            router.delete(':id', [JobApplicationsController, 'destroy'])
+            router.get('count', [JobApplicationsController, 'getTotal'])
+            router.get('count-per-day', [JobApplicationsController, 'getApplicationsCountPerDay'])
+            router.get('stats', [JobApplicationsController, 'getStatistics'])
+            router.get('recent', [JobApplicationsController, 'getRecent'])
+            router.get('user/:userId', [JobApplicationsController, 'getByUser'])
+            router.get('user/:userId/stats', [JobApplicationsController, 'getUserStatistics'])
+            router.get('job/:jobId', [JobApplicationsController, 'getByJob'])
+            router.get('job/:jobId/stats', [JobApplicationsController, 'getJobStatistics'])
+            router.get('job/:jobId/check', [JobApplicationsController, 'hasApplied'])
+            router.get('company/:companyId', [JobApplicationsController, 'getCompanyApplications'])
+            router.get(':id', [JobApplicationsController, 'show'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('job-applications')
+
+    /**
+     * Appointments routes
+     */
+    router
+      .group(() => {
+        // Protected
+        router
+          .group(() => {
+            router.get('', [AppointmentsController, 'index'])
+            router.post('', [AppointmentsController, 'store'])
+            router.put(':id', [AppointmentsController, 'update'])
+            router.delete(':id', [AppointmentsController, 'destroy'])
+            router.get('count', [AppointmentsController, 'getTotal'])
+            router.get('upcoming', [AppointmentsController, 'getUpcoming'])
+            router.get('stats', [AppointmentsController, 'getStatistics'])
+            router.get('user/:userId', [AppointmentsController, 'getByUser'])
+            router.get('company/:companyId', [AppointmentsController, 'getByCompany'])
+            router.patch(':id/status', [AppointmentsController, 'updateStatus'])
+            router.patch(':id/mark-read', [AppointmentsController, 'markAsRead'])
+            router.get(':id', [AppointmentsController, 'show'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('appointments')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })

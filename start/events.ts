@@ -1,3 +1,4 @@
+import AppointmentCreated from '#events/appointment_created'
 import UserLoggedIn from '#events/user_logged_in'
 import UserPasswordChanged from '#events/user_password_changed'
 import UserPasswordReset from '#events/user_password_reset'
@@ -6,6 +7,7 @@ import UserRegistered from '#events/user_registered'
 import UserUpdateEmailRequested from '#events/user_update_email_requested'
 import emitter from '@adonisjs/core/services/emitter'
 
+emitter.listen(AppointmentCreated, [() => import('#listeners/send_appointment_notification')])
 emitter.listen(UserPasswordChanged, [() => import('#listeners/send_user_password_changed_email')])
 emitter.listen(UserRegistered, [() => import('#listeners/send_verification_email')])
 emitter.listen(UserLoggedIn, [() => import('#listeners/update_user_last_login')])
