@@ -219,13 +219,14 @@ export default class JobsController {
    */
   async getActive({ request, response }: HttpContext) {
     try {
-      const { page = 1, limit = 10, userId, status } = request.qs()
+      const { page = 1, limit = 10, userId, status, search } = request.qs()
 
       const jobs = await this.jobService.getActiveJobs({
         page,
         limit,
         userId,
         status,
+        search,
       })
 
       return response.ok(jobs)
