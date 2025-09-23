@@ -340,13 +340,14 @@ export default class JobService {
    */
   async getActiveJobs(
     filters: {
+      search?: string
       page?: number
       limit?: number
       userId?: string
       status?: JobStatus
     } = {}
   ) {
-    const { page = 1, limit = 10, userId, status } = filters
+    const { page = 1, limit = 10, userId, status, search = '' } = filters
 
     let queryBuilder = Job.query()
       .where((query) => {
@@ -355,6 +356,17 @@ export default class JobService {
       .preload('user')
       .preload('applications')
       .orderBy('created_at', 'desc')
+
+    // Apply search filter
+    if (search) {
+      queryBuilder = queryBuilder.where((query) => {
+        query.whereILike('title', `%${search}%`)
+        query.orWhereILike('description', `%${search}%`)
+        query.orWhereILike('company_name', `%${search}%`)
+        query.orWhereILike('company_email', `%${search}%`)
+        query.orWhereILike('company_city', `%${search}%`)
+      })
+    }
 
     if (userId) {
       queryBuilder = queryBuilder.andWhere('userId', userId)
