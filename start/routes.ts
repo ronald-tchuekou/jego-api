@@ -23,6 +23,7 @@ const FilesController = () => import('#controllers/files_controller')
 const JobsController = () => import('#controllers/jobs_controller')
 const JobApplicationsController = () => import('#controllers/job_applications_controller')
 const AppointmentsController = () => import('#controllers/appointments_controller')
+const UserCVsController = () => import('#controllers/user_cvs_controller')
 
 router.get('', async () => {
   return {
@@ -291,6 +292,26 @@ router
           .middleware([middleware.auth()])
       })
       .prefix('appointments')
+
+    /**
+     * User CVs routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get('', [UserCVsController, 'index'])
+            router.post('', [UserCVsController, 'store'])
+            router.get('count', [UserCVsController, 'getTotal'])
+            router.get('user/:userId', [UserCVsController, 'getByUser'])
+            router.get(':id', [UserCVsController, 'show'])
+            router.put(':id', [UserCVsController, 'update'])
+            router.delete(':id', [UserCVsController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('user-cvs')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })
