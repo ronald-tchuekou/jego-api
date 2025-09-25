@@ -52,6 +52,31 @@ export default class FilesController {
     return response.ok(`${FILES_STORAGE_PATH}/${filename}`)
   }
 
+  async uploadSingleFile({ response, request }: HttpContext) {
+    const files = request.files('files')
+
+    if (!files || (files && files.length === 0)) {
+      return response.badRequest({
+        message: 'Pas de fichiers téléchargés.',
+        error: 'No files uploaded',
+      })
+    }
+
+    const file = files[0]
+    const filename = `${Date.now()}_${file.extname}.${file.extname}`
+    await file.move(FILES_STORAGE_PATH, {
+      name: filename,
+      overwrite: true,
+    })
+
+    return response.ok({
+      path: `${FILES_STORAGE_PATH}/${filename}`,
+      name: filename,
+      type: file.type,
+      filename: file.fileName,
+    })
+  }
+
   async load({ response, request }: HttpContext) {
     const { filePath } = request.qs()
 

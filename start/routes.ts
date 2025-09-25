@@ -202,6 +202,7 @@ router
      */
     router
       .group(() => {
+        router.post('single', [FilesController, 'uploadSingleFile'])
         router.post('upload-single', [FilesController, 'uploadSingle'])
         router.post('upload-multiple', [FilesController, 'uploadMultiple'])
         router.get('load', [FilesController, 'load'])
