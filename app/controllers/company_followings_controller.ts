@@ -1,6 +1,6 @@
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import CompanyFollowingService from '#services/company_following'
+import CompanyFollowingService from '#services/company_following_service'
 import logger from '@adonisjs/core/services/logger'
 
 @inject()
