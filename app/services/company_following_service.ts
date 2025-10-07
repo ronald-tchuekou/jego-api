@@ -33,7 +33,13 @@ export default class CompanyFollowingService {
       throw new Error("Cette entreprise n'existe pas.")
     }
 
-    return companyFollowing.save()
+    const following = await companyFollowing.save()
+
+    // Increment company following count
+    company.followingCount = Math.max(company.followingCount + 1, 0)
+    await company.save()
+
+    return following
   }
 
   /**
@@ -86,8 +92,14 @@ export default class CompanyFollowingService {
    * @throws Error if company is not found
    */
   async delete(companyId: string, userId: string): Promise<boolean> {
-    const company = await CompanyFollowing.findByOrFail({ companyId, userId })
-    await company.delete()
+    const following = await CompanyFollowing.findByOrFail({ companyId, userId })
+    await following.delete()
+
+    // Decrement company following count
+    const company = await Company.findOrFail(companyId)
+    company.followingCount = Math.max(company.followingCount - 1, 0)
+    await company.save()
+
     return true
   }
 }
