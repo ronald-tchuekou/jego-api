@@ -76,6 +76,9 @@ export default class Company extends BaseModel {
   declare description: string | null
 
   @column()
+  declare followingCount: number
+
+  @column()
   declare verifiedAt: DateTime | null
 
   @column()
