@@ -24,6 +24,7 @@ const JobsController = () => import('#controllers/jobs_controller')
 const JobApplicationsController = () => import('#controllers/job_applications_controller')
 const AppointmentsController = () => import('#controllers/appointments_controller')
 const UserCVsController = () => import('#controllers/user_cvs_controller')
+const CompanyFollowingController = () => import('#controllers/company_followings_controller')
 
 router.get('', async () => {
   return {
@@ -89,7 +90,7 @@ router
       .prefix('users')
 
     /**
-     * Categories routes
+     * Category routes
      */
     router
       .group(() => {
@@ -313,6 +314,23 @@ router
           .middleware([middleware.auth()])
       })
       .prefix('user-cvs')
+
+    /**
+     * Company Following routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get('followers/:companyId', [CompanyFollowingController, 'getCompanyFollowers'])
+            router.get(':companyId/:userId', [CompanyFollowingController, 'getUserFollowing'])
+            router.patch(':companyId', [CompanyFollowingController, 'store'])
+            router.delete(':companyId', [CompanyFollowingController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('company-following')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })
