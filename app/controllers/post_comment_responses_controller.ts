@@ -2,6 +2,7 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import logger from '@adonisjs/core/services/logger'
 import PostCommentResponseService from '#services/post_comment_response_service'
+import { createPostValidator } from '#validators/post_comment'
 
 @inject()
 export default class PostCommentResponsesController {
@@ -44,6 +45,25 @@ export default class PostCommentResponsesController {
       logger.error('Error on creating postCommentResponse: ', JSON.stringify(error, null, 2))
       return response.badRequest({
         message: 'Une erreur est survenue lors de la création de la réponse au commentaire.',
+        error: error.message,
+      })
+    }
+  }
+
+  async update({ request, response }: HttpContext) {
+    try {
+      const id = request.param('id')
+      const { comment } = await request.validateUsing(createPostValidator)
+
+      const postComment = await this.postCommentResponseService.update(id, {
+        comment,
+      })
+
+      return response.created({ data: postComment })
+    } catch (error) {
+      logger.error('Error on updating postComment: ' + error)
+      return response.badRequest({
+        message: 'Une erreur est survenue lors de la mise à jour du commentaire.',
         error: error.message,
       })
     }

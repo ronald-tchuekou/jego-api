@@ -59,4 +59,11 @@ export default class PostCommentService {
 
     return true
   }
+
+  async update(id: string, data: { comment: string }) {
+    const postComment = await PostComment.findOrFail(id)
+    postComment.comment = data.comment
+    await postComment.save()
+    return postComment
+  }
 }

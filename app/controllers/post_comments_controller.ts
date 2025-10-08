@@ -30,12 +30,6 @@ export default class PostCommentsController {
       const user = auth.getUserOrFail()
       const { comment } = await request.validateUsing(createPostValidator)
 
-      if (!comment) {
-        return response.badRequest({
-          message: 'Le commentaire est obligatoire.',
-        })
-      }
-
       const postComment = await this.postCommentService.create({
         postId,
         userId: user.id,
@@ -47,6 +41,25 @@ export default class PostCommentsController {
       logger.error('Error on creating postComment: ' + error)
       return response.badRequest({
         message: 'Une erreur est survenue lors de la création du commentaire.',
+        error: error.message,
+      })
+    }
+  }
+
+  async update({ request, response }: HttpContext) {
+    try {
+      const id = request.param('id')
+      const { comment } = await request.validateUsing(createPostValidator)
+
+      const postComment = await this.postCommentService.update(id, {
+        comment,
+      })
+
+      return response.created({ data: postComment })
+    } catch (error) {
+      logger.error('Error on updating postComment: ' + error)
+      return response.badRequest({
+        message: 'Une erreur est survenue lors de la mise à jour du commentaire.',
         error: error.message,
       })
     }

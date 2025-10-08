@@ -29,8 +29,8 @@ export default class PostCommentResponseService {
 
     const commentResponse = await postCommentResponse.save()
 
-    commentResponse.load('user')
-    commentResponse.load('postComment')
+    await commentResponse.load('user')
+    await commentResponse.load('postComment')
 
     return commentResponse
   }
@@ -38,6 +38,8 @@ export default class PostCommentResponseService {
   async getPostCommentResponses(postCommentId: string, page: number = 1, limit: number = 5) {
     return PostCommentResponse.query()
       .where('postCommentId', postCommentId)
+      .preload('user')
+      .preload('postComment')
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
   }
@@ -46,5 +48,12 @@ export default class PostCommentResponseService {
     const commentResponse = await PostCommentResponse.findOrFail(postCommentResponseId)
     await commentResponse.delete()
     return true
+  }
+
+  async update(id: string, data: { comment: string }) {
+    const postComment = await PostCommentResponse.findOrFail(id)
+    postComment.comment = data.comment
+    await postComment.save()
+    return postComment
   }
 }
