@@ -42,10 +42,10 @@ export default class PostLikesController {
     }
   }
 
-  async destroy({ params, response, auth }: HttpContext) {
+  async destroy({ request, response, auth }: HttpContext) {
     try {
       const user = auth.getUserOrFail()
-      const postId = params.postId
+      const postId = request.param('postId')
       await this.postLikeService.delete(postId, user.id)
       return response.ok({ message: 'Like supprimé avec succès' })
     } catch (error) {

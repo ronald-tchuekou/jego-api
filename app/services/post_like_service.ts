@@ -27,13 +27,13 @@ export default class PostLikeService {
       throw new Error("Ce post n'existe pas.")
     }
 
-    const like = await postLike.save()
+    await postLike.save()
 
     // Increment company like count
     post.likeCount = Math.max(post.likeCount + 1, 0)
     await post.save()
 
-    return like
+    return postLike
   }
 
   async getUserLike(userId: string, postId: string) {
@@ -41,14 +41,8 @@ export default class PostLikeService {
   }
 
   async delete(postId: string, userId: string): Promise<boolean> {
-    const like = await PostLike.query().where('postId', postId).andWhere('userId', userId).first()
-    console.info('Delete like: ', like, ', postId: ', postId, ', userId: ', userId, '')
-
-    if (!like) {
-      throw new Error('Like not found')
-    }
-
-    await like.delete()
+    const postLike = await PostLike.findByOrFail({ postId, userId })
+    await postLike.delete()
 
     // Decrement post like count
     const post = await Post.findOrFail(postId)

@@ -33,8 +33,8 @@ export default class PostCommentService {
     post.commentCount = Math.max(post.commentCount + 1, 0)
     await post.save()
 
-    comment.load('user')
-    comment.load('post')
+    await comment.load('user')
+    await comment.load('post')
 
     return comment
   }
@@ -42,6 +42,8 @@ export default class PostCommentService {
   async getPostComments(postId: string, page: number = 1, limit: number = 5) {
     return PostComment.query()
       .where('postId', postId)
+      .preload('user')
+      .preload('post')
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
   }
