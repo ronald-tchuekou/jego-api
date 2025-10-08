@@ -13,7 +13,7 @@ export const UserFactory = factory
     state: faker.location.state(),
     zipCode: faker.location.zipCode(),
     country: faker.location.country(),
-    password: faker.internet.password(),
+    password: 'password',
     role: faker.helpers.arrayElement(Object.values(UserRole)),
     verifiedAt: null,
     lastLoginAt: null,

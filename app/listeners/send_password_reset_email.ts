@@ -4,6 +4,7 @@ import mail from '@adonisjs/mail/services/main'
 
 export default class SendPasswordResetEmail {
   async handle(event: UserPasswordResetRequested) {
+    if (true) return
     await mail.send(new ResetPasswordNotification(event.user.email, event.resetToken))
   }
 }
