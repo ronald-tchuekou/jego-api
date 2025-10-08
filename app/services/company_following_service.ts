@@ -33,13 +33,13 @@ export default class CompanyFollowingService {
       throw new Error("Cette entreprise n'existe pas.")
     }
 
-    const following = await companyFollowing.save()
+    await companyFollowing.save()
 
     // Increment company following count
     company.followingCount = Math.max(company.followingCount + 1, 0)
     await company.save()
 
-    return following
+    return companyFollowing
   }
 
   /**

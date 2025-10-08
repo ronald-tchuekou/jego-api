@@ -2,6 +2,7 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import logger from '@adonisjs/core/services/logger'
 import PostCommentService from '#services/post_comment_service'
+import { createPostValidator } from '#validators/post_comment'
 
 @inject()
 export default class PostCommentsController {
@@ -27,7 +28,7 @@ export default class PostCommentsController {
     try {
       const postId = request.param('postId')
       const user = auth.getUserOrFail()
-      const comment = request.input('comment')
+      const { comment } = await request.validateUsing(createPostValidator)
 
       if (!comment) {
         return response.badRequest({
@@ -43,7 +44,7 @@ export default class PostCommentsController {
 
       return response.created({ data: postComment })
     } catch (error) {
-      logger.error('Error on creating postComment: ', JSON.stringify(error, null, 2))
+      logger.error('Error on creating postComment: ' + error)
       return response.badRequest({
         message: 'Une erreur est survenue lors de la création du commentaire.',
         error: error.message,
