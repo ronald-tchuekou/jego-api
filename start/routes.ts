@@ -378,6 +378,7 @@ router
           .group(() => {
             router.get(':postId', [PostCommentsController, 'getPostComments'])
             router.post(':postId', [PostCommentsController, 'store'])
+            router.put(':id', [PostCommentsController, 'update'])
             router.delete(':id', [PostCommentsController, 'destroy'])
           })
           .middleware([middleware.auth()])
@@ -396,7 +397,8 @@ router
               PostCommentResponsesController,
               'getPostCommentResponses',
             ])
-            router.patch(':postCommentId', [PostCommentResponsesController, 'store'])
+            router.post(':postCommentId', [PostCommentResponsesController, 'store'])
+            router.put(':id', [PostCommentResponsesController, 'update'])
             router.delete(':id', [PostCommentResponsesController, 'destroy'])
           })
           .middleware([middleware.auth()])
