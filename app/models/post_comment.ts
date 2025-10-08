@@ -1,41 +1,24 @@
-import User from '#models/user'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
+import User from '#models/user'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import Post from '#models/post'
 
-export default class Post extends BaseModel {
+export default class PostComment extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
+
+  @column()
+  declare postId: string
 
   @column()
   declare userId: string
 
   @column()
-  declare title: string
-
-  @column()
-  declare description: string
-
-  @column()
-  declare status: string
-
-  @column()
-  declare type: string
-
-  @column()
-  declare category: string
-
-  @column()
-  declare image: string | null
+  declare comment: string
 
   @column()
   declare likeCount: number
-
-  @column()
-  declare commentCount: number
-
-  @column()
-  declare shareCount: number
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -45,4 +28,7 @@ export default class Post extends BaseModel {
 
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
+
+  @belongsTo(() => Post)
+  declare post: BelongsTo<typeof Post>
 }

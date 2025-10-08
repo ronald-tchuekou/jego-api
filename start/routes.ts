@@ -25,6 +25,11 @@ const JobApplicationsController = () => import('#controllers/job_applications_co
 const AppointmentsController = () => import('#controllers/appointments_controller')
 const UserCVsController = () => import('#controllers/user_cvs_controller')
 const CompanyFollowingController = () => import('#controllers/company_followings_controller')
+const PostLikesController = () => import('#controllers/post_likes_controller')
+const PostSharesController = () => import('#controllers/post_shares_controller')
+const PostCommentsController = () => import('#controllers/post_comments_controller')
+const PostCommentResponsesController = () =>
+  import('#controllers/post_comment_responses_controller')
 
 router.get('', async () => {
   return {
@@ -331,6 +336,72 @@ router
           .middleware([middleware.auth()])
       })
       .prefix('company-following')
+
+    /**
+     * Post-Like routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get(':postId/:userId', [PostLikesController, 'getUserLike'])
+            router.patch(':postId', [PostLikesController, 'store'])
+            router.delete(':postId', [PostLikesController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('post-likes')
+
+    /**
+     * Post-Share routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get(':postId/:userId', [PostSharesController, 'getUserShare'])
+            router.patch(':postId', [PostSharesController, 'store'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('post-shares')
+
+    /**
+     * Post-Comment routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get(':postId', [PostCommentsController, 'getPostComments'])
+            router.patch(':postId', [PostCommentsController, 'store'])
+            router.delete(':id', [PostCommentsController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('post-comments')
+
+    /**
+     * Post-Comment-Response routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get(':postCommentId', [
+              PostCommentResponsesController,
+              'getPostCommentResponses',
+            ])
+            router.patch(':postCommentId', [PostCommentResponsesController, 'store'])
+            router.delete(':id', [PostCommentResponsesController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('post-comment-responses')
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })

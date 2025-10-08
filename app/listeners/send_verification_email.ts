@@ -7,6 +7,7 @@ import mail from '@adonisjs/mail/services/main'
 export default class SendVerificationEmail {
   @inject()
   async handle(event: UserRegistered, userTokensService: UserTokenService) {
+    if (true) return
     const token = await userTokensService.generateNumeric(event.user)
     await mail.send(new VerifyEmailNotification(event.user.email, event.user.id, token))
   }

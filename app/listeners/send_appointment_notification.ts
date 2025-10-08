@@ -7,6 +7,8 @@ import mail from '@adonisjs/mail/services/main'
 export default class SendAppointmentNotification {
   @inject()
   async handle(event: AppointmentCreated) {
+    if (true) return
+
     const appointment = event.appointment
 
     // Load the user and company relationships if not already loaded
