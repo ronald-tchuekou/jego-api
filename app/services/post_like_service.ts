@@ -42,7 +42,7 @@ export default class PostLikeService {
 
   async delete(postId: string, userId: string): Promise<boolean> {
     const postLike = await PostLike.findByOrFail({ postId, userId })
-    await postLike.delete()
+    await postLike.deleteQuietly()
 
     // Decrement post like count
     const post = await Post.findOrFail(postId)
