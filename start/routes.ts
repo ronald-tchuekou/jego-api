@@ -31,6 +31,8 @@ const PostSharesController = () => import('#controllers/post_shares_controller')
 const PostCommentsController = () => import('#controllers/post_comments_controller')
 const PostCommentResponsesController = () =>
   import('#controllers/post_comment_responses_controller')
+const ConversationsController = () => import('#controllers/conversations_controller')
+const MessagesController = () => import('#controllers/messages_controller')
 
 router.get('', async () => {
   return {
@@ -405,6 +407,40 @@ router
           .middleware([middleware.auth()])
       })
       .prefix('post-comment-responses')
+
+    /**
+     * Chat routes
+     */
+    router
+      .group(() => {
+        // Conversations
+        router
+          .group(() => {
+            router.get('', [ConversationsController, 'index'])
+            router.post('', [ConversationsController, 'store'])
+            router.get('unread-count', [ConversationsController, 'unreadCount'])
+            router.get('search-messages', [ConversationsController, 'searchMessages'])
+            router.get(':id', [ConversationsController, 'show'])
+            router.get(':id/messages', [ConversationsController, 'getMessages'])
+            router.patch(':id/mark-read', [ConversationsController, 'markAsRead'])
+            router.post(':id/participants', [ConversationsController, 'addParticipant'])
+            router.delete(':id/participants', [ConversationsController, 'removeParticipant'])
+            router.post(':id/typing', [ConversationsController, 'typing'])
+            router.get(':id/active-users', [ConversationsController, 'activeUsers'])
+            router.get('user-status/:userId', [ConversationsController, 'userStatus'])
+          })
+          .prefix('conversations')
+
+        // Messages
+        router
+          .group(() => {
+            router.post('', [MessagesController, 'store'])
+            router.delete(':id', [MessagesController, 'destroy'])
+          })
+          .prefix('messages')
+      })
+      .prefix('chat')
+      .middleware([middleware.auth()])
 
     router.get('storage/*', [DownloadFileController, 'download'])
   })

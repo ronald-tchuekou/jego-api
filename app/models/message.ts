@@ -1,8 +1,15 @@
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import Conversation from './conversation.js'
+import MessageAttachment from './message_attachment.js'
 import User from './user.js'
+
+export enum MessageType {
+  TEXT = 'text',
+  ATTACHMENT = 'attachment',
+  TEXT_ATTACHMENT = 'text_attachment',
+}
 
 export default class Message extends BaseModel {
   @column({ isPrimary: true })
@@ -21,7 +28,7 @@ export default class Message extends BaseModel {
   declare isRead: boolean
 
   @column()
-  declare type: string
+  declare type: MessageType
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -34,4 +41,7 @@ export default class Message extends BaseModel {
 
   @belongsTo(() => User)
   declare sender: BelongsTo<typeof User>
+
+  @hasMany(() => MessageAttachment)
+  declare attachments: HasMany<typeof MessageAttachment>
 }

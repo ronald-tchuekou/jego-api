@@ -1,6 +1,7 @@
 import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import Message from './message.js'
 import Participant from './participant.js'
 
 export default class Conversation extends BaseModel {
@@ -15,4 +16,7 @@ export default class Conversation extends BaseModel {
 
   @hasMany(() => Participant)
   declare participants: HasMany<typeof Participant>
+
+  @hasMany(() => Message)
+  declare messages: HasMany<typeof Message>
 }
