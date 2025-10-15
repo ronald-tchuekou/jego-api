@@ -9,6 +9,7 @@
 
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
+import transmit from '@adonisjs/transmit/services/main'
 
 const AuthController = () => import('#controllers/auth_controller')
 const MeController = () => import('#controllers/me_controller')
@@ -408,3 +409,5 @@ router
     router.get('storage/*', [DownloadFileController, 'download'])
   })
   .prefix('v1')
+
+transmit.registerRoutes()
