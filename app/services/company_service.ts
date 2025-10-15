@@ -58,6 +58,8 @@ export default class CompanyService {
 
     const savedCompany = await company.save()
 
+    await savedCompany.load('users')
+
     return savedCompany
   }
 
@@ -78,6 +80,8 @@ export default class CompanyService {
     })
 
     const savedCompany = await company.save()
+
+    await savedCompany.load('users')
 
     return savedCompany
   }
@@ -111,6 +115,7 @@ export default class CompanyService {
       .preload('images')
       .preload('docs')
       .preload('posts')
+      .preload('users')
 
     if (categoryId) {
       queryBuilder = queryBuilder.andWhere('categoryId', categoryId)
@@ -169,6 +174,7 @@ export default class CompanyService {
       .preload('images')
       .preload('docs')
       .preload('posts')
+      .preload('users')
       .first()
   }
 
@@ -188,6 +194,7 @@ export default class CompanyService {
       .preload('images')
       .preload('docs')
       .preload('posts')
+      .preload('users')
       .first()
   }
 
