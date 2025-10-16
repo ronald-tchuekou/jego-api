@@ -76,7 +76,7 @@ export const chatTransmit = {
    * Broadcast typing indicator to conversation
    */
   broadcastTyping: async (conversationId: string, userId: string, isTyping: boolean) => {
-    await transmit.broadcast(`conversation.${conversationId}`, {
+    transmit.broadcast(`conversation.${conversationId}`, {
       type: 'typing_indicator',
       data: JSON.stringify({
         userId,
@@ -90,7 +90,7 @@ export const chatTransmit = {
    * Broadcast user online status
    */
   broadcastUserStatus: async (userId: string, isOnline: boolean) => {
-    await transmit.broadcast(`user.${userId}`, {
+    transmit.broadcast(`user.${userId}`, {
       type: isOnline ? 'user_online' : 'user_offline',
       data: JSON.stringify({
         userId,
