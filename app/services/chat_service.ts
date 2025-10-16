@@ -61,61 +61,20 @@ export default class ChatService {
   }
 
   /**
-   * Find existing conversation between participants
-   */
-  private async findExistingConversation(participantIds: string[]): Promise<Conversation | null> {
-    if (participantIds.length !== 2) {
-      return null // Only check for direct conversations (2 participants)
-    }
-
-    const conversations = await db
-      .from('conversations')
-      .join('participants as p1', 'conversations.id', 'p1.conversation_id')
-      .join('participants as p2', 'conversations.id', 'p2.conversation_id')
-      .where('p1.user_id', participantIds[0])
-      .where('p2.user_id', participantIds[1])
-      .where('p1.user_id', '!=', 'p2.user_id')
-      .select('conversations.id')
-      .groupBy('conversations.id')
-      .havingRaw('COUNT(DISTINCT participants.user_id) = ?', [participantIds.length])
-
-    if (conversations.length > 0) {
-      return await Conversation.query()
-        .where('id', conversations[0].id)
-        .preload('participants', (query) => {
-          query.preload('user')
-        })
-        .firstOrFail()
-    }
-
-    return null
-  }
-
-  /**
    * Get conversations for a user (returns all conversations with last message only)
    */
   async getUserConversations(userId: string): Promise<Conversation[]> {
-    const conversations = await Conversation.query()
+    return Conversation.query()
       .whereHas('participants', (query) => {
         query.where('userId', userId)
       })
       .preload('participants', (query) => {
-        query.preload('user', (userQuery) => {
-          userQuery.select(['id', 'firstName', 'lastName', 'profileImage'])
-        })
+        query.preload('user')
       })
       .preload('messages', (query) => {
-        query
-          .orderBy('createdAt', 'desc')
-          .limit(1)
-          .preload('sender', (senderQuery) => {
-            senderQuery.select(['id', 'firstName', 'lastName', 'profileImage'])
-          })
-          .preload('attachments')
+        query.orderBy('createdAt', 'desc').preload('sender')
       })
       .orderBy('updatedAt', 'desc')
-
-    return conversations
   }
 
   /**
@@ -132,7 +91,7 @@ export default class ChatService {
       throw new Error('You are not a participant in this conversation')
     }
 
-    const conversation = await Conversation.query()
+    return Conversation.query()
       .where('id', conversationId)
       .preload('participants', (query) => {
         query.preload('user', (userQuery) => {
@@ -140,8 +99,6 @@ export default class ChatService {
         })
       })
       .firstOrFail()
-
-    return conversation
   }
 
   /**
@@ -158,7 +115,7 @@ export default class ChatService {
       throw new Error('You are not a participant in this conversation')
     }
 
-    const messages = await Message.query()
+    return Message.query()
       .where('conversationId', conversationId)
       .preload('sender', (senderQuery) => {
         senderQuery.select(['id', 'firstName', 'lastName', 'profileImage'])
@@ -166,8 +123,6 @@ export default class ChatService {
       .preload('attachments')
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
-
-    return messages
   }
 
   /**
@@ -271,7 +226,7 @@ export default class ChatService {
    * Search messages in conversations
    */
   async searchMessages(userId: string, query: string, page = 1, limit = 20): Promise<Message[]> {
-    const messages = await Message.query()
+    return Message.query()
       .whereHas('conversation', (conversationQuery) => {
         conversationQuery.whereHas('participants', (participantQuery) => {
           participantQuery.where('userId', userId)
@@ -290,8 +245,6 @@ export default class ChatService {
       })
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
-
-    return messages
   }
 
   /**
@@ -317,16 +270,6 @@ export default class ChatService {
         messageId,
         conversationId: message.conversationId,
       }),
-    })
-  }
-
-  /**
-   * Broadcast message to conversation participants
-   */
-  private async broadcastMessage(conversationId: string, message: Message): Promise<void> {
-    await transmit.broadcast(`conversation.${conversationId}`, {
-      type: 'new_message',
-      data: JSON.stringify(message),
     })
   }
 
@@ -409,6 +352,50 @@ export default class ChatService {
         userId,
         removedBy,
       }),
+    })
+  }
+
+  /**
+   * Find existing conversation between participants
+   */
+  private async findExistingConversation(participantIds: string[]): Promise<Conversation | null> {
+    if (participantIds.length !== 2) {
+      return null // Only check for direct conversations (2 participants)
+    }
+
+    const conversations = await db
+      .from('conversations')
+      .join('participants as p1', 'conversations.id', 'p1.conversation_id')
+      .join('participants as p2', 'conversations.id', 'p2.conversation_id')
+      .where('p1.user_id', participantIds[0])
+      .where('p2.user_id', participantIds[1])
+      .whereRaw('p1.user_id != p2.user_id')
+      .select('conversations.id')
+      .groupBy('conversations.id')
+      .havingRaw(
+        'COUNT(DISTINCT CASE WHEN p1.user_id = ? OR p1.user_id = ? THEN p1.user_id END) = ?',
+        [participantIds[0], participantIds[1], participantIds.length]
+      )
+
+    if (conversations.length > 0) {
+      return await Conversation.query()
+        .where('id', conversations[0].id)
+        .preload('participants', (query) => {
+          query.preload('user')
+        })
+        .firstOrFail()
+    }
+
+    return null
+  }
+
+  /**
+   * Broadcast message to conversation participants
+   */
+  private async broadcastMessage(conversationId: string, message: Message): Promise<void> {
+    await transmit.broadcast(`conversation.${conversationId}`, {
+      type: 'new_message',
+      data: JSON.stringify(message),
     })
   }
 }
