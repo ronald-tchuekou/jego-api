@@ -1,7 +1,8 @@
 import User from '#models/user'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import PostMedia from './post_media.js'
 
 export default class Post extends BaseModel {
   @column({ isPrimary: true })
@@ -26,7 +27,7 @@ export default class Post extends BaseModel {
   declare category: string
 
   @column()
-  declare image: string | null
+  declare mediaType: 'image' | 'video' | null
 
   @column()
   declare likeCount: number
@@ -45,4 +46,7 @@ export default class Post extends BaseModel {
 
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
+
+  @hasMany(() => PostMedia)
+  declare medias: HasMany<typeof PostMedia>
 }

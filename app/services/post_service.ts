@@ -2,6 +2,7 @@ import Post from '#models/post'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
+import PostMediaService, { type PostMediaData } from './post_media_service.js'
 
 export default class PostService {
   private fields: (keyof Post)[] = [
@@ -11,17 +12,22 @@ export default class PostService {
     'status',
     'type',
     'category',
-    'image',
+    'mediaType',
   ]
+  private postMediaService: PostMediaService
+
+  constructor() {
+    this.postMediaService = new PostMediaService()
+  }
 
   /**
    * Create a new post
-   * @param data - The data to create the post
+   * @param data - The data to create the post (including optional medias array)
    * @param user - The user creating the post
    * @returns The created post
    * @throws Error if required fields are missing
    */
-  async create(data: Partial<Post>, user: User): Promise<Post> {
+  async create(data: Partial<Post> & { medias?: PostMediaData[] }, user: User): Promise<Post> {
     const post = new Post()
 
     // Validate required fields
@@ -43,7 +49,15 @@ export default class PostService {
     })
 
     const savedPost = await post.save()
+
+    // Handle media creation if provided
+    if (data.medias && data.medias.length > 0) {
+      await this.postMediaService.createMany(savedPost.id, data.medias)
+    }
+
+    // Reload post with all relationships
     await savedPost.load('user', (userQuery) => userQuery.preload('company'))
+    await savedPost.load('medias')
 
     return savedPost
   }
@@ -51,11 +65,11 @@ export default class PostService {
   /**
    * Update an existing post
    * @param postId - The ID of the post to update
-   * @param data - The data to update
+   * @param data - The data to update (including optional medias array)
    * @returns The updated post
    * @throws Error if the post is not found
    */
-  async update(postId: string, data: Partial<Post>): Promise<Post> {
+  async update(postId: string, data: Partial<Post> & { medias?: PostMediaData[] }): Promise<Post> {
     const post = await Post.findOrFail(postId)
 
     this.fields.forEach((field) => {
@@ -65,7 +79,21 @@ export default class PostService {
     })
 
     const savedPost = await post.save()
+
+    // Handle media update if provided
+    if (data.medias !== undefined) {
+      if (data.medias.length > 0) {
+        // Replace existing media with new ones
+        await this.postMediaService.updatePostMedias(savedPost.id, data.medias)
+      } else {
+        // Delete all media if empty array provided
+        await this.postMediaService.deleteAllPostMedias(savedPost.id)
+      }
+    }
+
+    // Reload post with all relationships
     await savedPost.load('user', (userQuery) => userQuery.preload('company'))
+    await savedPost.load('medias')
 
     return savedPost
   }
@@ -88,6 +116,7 @@ export default class PostService {
 
     let queryBuilder = Post.query()
       .preload('user', (userQuery) => userQuery.preload('company'))
+      .preload('medias')
       .orderBy('created_at', 'desc')
 
     // Apply search filter
@@ -145,12 +174,13 @@ export default class PostService {
   /**
    * Find a post by ID
    * @param postId - The ID of the post to find
-   * @returns The post with user relationship loaded
+   * @returns The post with user and medias relationships loaded
    */
   async findById(postId: string): Promise<Post | null> {
     return Post.query()
       .where('id', postId)
       .preload('user', (userQuery) => userQuery.preload('company'))
+      .preload('medias')
       .first()
   }
 
@@ -175,6 +205,7 @@ export default class PostService {
     let queryBuilder = Post.query()
       .where('userId', userId)
       .preload('user', (userQuery) => userQuery.preload('company'))
+      .preload('medias')
       .orderBy('created_at', 'desc')
 
     // Apply additional filters
@@ -228,6 +259,7 @@ export default class PostService {
     let queryBuilder = Post.query()
       .where('category', category)
       .preload('user', (userQuery) => userQuery.preload('company'))
+      .preload('medias')
       .orderBy('created_at', 'desc')
 
     // Apply search filter
@@ -328,6 +360,7 @@ export default class PostService {
       .join('companies', 'users.company_id', 'companies.id')
       .where('companies.id', companyId)
       .preload('user')
+      .preload('medias')
       .orderBy('created_at', 'desc')
 
     if (search) {
