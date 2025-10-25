@@ -5,15 +5,15 @@ const postMediaSchema = vine.object({
   name: vine.string().trim(),
   type: vine.string().trim(),
   url: vine.string().trim(),
-  size: vine.string().trim(),
+  size: vine.number().positive(),
   thumbnailUrl: vine.string().trim().optional(),
   alt: vine.string().trim().optional(),
   metadata: vine
     .object({
-      width: vine.number().optional(),
-      height: vine.number().optional(),
+      width: vine.number(),
+      height: vine.number(),
       duration: vine.number().optional(),
-      aspectRatio: vine.string().trim().optional(),
+      aspectRatio: vine.string().trim(),
     })
     .optional(),
 })
