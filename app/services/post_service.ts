@@ -15,7 +15,7 @@ type CreatePostDto = {
     name: string
     type: string
     url: string
-    size: string
+    size: number
     thumbnailUrl?: string
     alt?: string
     metadata?: Record<string, any>
@@ -41,6 +41,13 @@ export default class PostService {
 
     // Set the user ID from the authenticated user
     post.userId = user.id
+
+    // Set all the post fields
+    Object.keys(data).forEach((key) => {
+      if (key !== 'medias' && data[key as keyof CreatePostDto] !== undefined) {
+        post[key as keyof Post] = data[key as keyof CreatePostDto] as never
+      }
+    })
 
     const savedPost = await post.save()
 

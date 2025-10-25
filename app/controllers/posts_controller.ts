@@ -46,6 +46,7 @@ export default class PostsController {
       await bouncer.authorize(createPost)
 
       const postData = await request.validateUsing(storePostValidator)
+
       const savedPost = await this.postService.create(postData, user)
 
       return response.created({ data: savedPost })

@@ -5,7 +5,7 @@ export interface PostMediaData {
   name: string
   type: string
   url: string
-  size: string
+  size: number
   thumbnailUrl?: string
   alt?: string
   metadata?: Record<string, any>

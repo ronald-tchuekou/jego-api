@@ -11,7 +11,7 @@ export default class extends BaseSchema {
       table.string('name').notNullable()
       table.string('type').notNullable()
       table.string('url').notNullable()
-      table.string('size').notNullable()
+      table.bigInteger('size').notNullable()
       table.string('thumbnail_url')
       table.string('alt')
       table.json('metadata')
