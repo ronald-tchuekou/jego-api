@@ -2,18 +2,27 @@ import Post from '#models/post'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
-import PostMediaService, { type PostMediaData } from './post_media_service.js'
+import PostMediaService from './post_media_service.js'
+
+type CreatePostDto = {
+  title: string
+  description: string
+  status: string
+  type: string
+  category: string
+  mediaType?: 'image' | 'video'
+  medias?: {
+    name: string
+    type: string
+    url: string
+    size: string
+    thumbnailUrl?: string
+    alt?: string
+    metadata?: Record<string, any>
+  }[]
+}
 
 export default class PostService {
-  private fields: (keyof Post)[] = [
-    'userId',
-    'title',
-    'description',
-    'status',
-    'type',
-    'category',
-    'mediaType',
-  ]
   private postMediaService: PostMediaService
 
   constructor() {
@@ -27,26 +36,11 @@ export default class PostService {
    * @returns The created post
    * @throws Error if required fields are missing
    */
-  async create(data: Partial<Post> & { medias?: PostMediaData[] }, user: User): Promise<Post> {
+  async create(data: CreatePostDto, user: User): Promise<Post> {
     const post = new Post()
-
-    // Validate required fields
-    const requiredFields: (keyof Post)[] = ['title', 'description', 'status', 'type', 'category']
-    requiredFields.forEach((field) => {
-      if (!data[field]) {
-        throw new Error(`${field} est requis pour créer un post`)
-      }
-    })
 
     // Set the user ID from the authenticated user
     post.userId = user.id
-
-    // Set other fields from data
-    this.fields.forEach((field) => {
-      if (field !== 'userId' && data[field] !== undefined) {
-        post[field] = data[field] as never
-      }
-    })
 
     const savedPost = await post.save()
 
@@ -69,14 +63,8 @@ export default class PostService {
    * @returns The updated post
    * @throws Error if the post is not found
    */
-  async update(postId: string, data: Partial<Post> & { medias?: PostMediaData[] }): Promise<Post> {
+  async update(postId: string, data: Partial<CreatePostDto>): Promise<Post> {
     const post = await Post.findOrFail(postId)
-
-    this.fields.forEach((field) => {
-      if (field !== 'userId' && data[field] !== undefined) {
-        post[field] = data[field] as never
-      }
-    })
 
     const savedPost = await post.save()
 
