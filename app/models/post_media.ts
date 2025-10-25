@@ -20,7 +20,7 @@ export default class PostMedia extends BaseModel {
   declare url: string
 
   @column()
-  declare size: string
+  declare size: number
 
   @column()
   declare thumbnailUrl: string

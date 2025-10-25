@@ -119,7 +119,7 @@ export async function createFakePosts(): Promise<void> {
                 media.name = `${faker.word.noun()}_${Date.now()}_${j}.jpg`
                 media.type = 'image/jpeg'
                 media.url = faker.image.url({ width, height })
-                media.size = faker.number.int({ min: 50000, max: 2000000 }).toString() // 50KB - 2MB
+                media.size = faker.number.int({ min: 50000, max: 2000000 }) // 50KB - 2MB
                 media.thumbnailUrl = faker.image.url({ width: 300, height: 300 })
                 media.alt = faker.lorem.sentence()
                 media.metadata = {
@@ -135,7 +135,7 @@ export async function createFakePosts(): Promise<void> {
                 media.name = `${faker.word.noun()}_${Date.now()}_${j}.mp4`
                 media.type = 'video/mp4'
                 media.url = faker.image.url({ width, height }) // Using image URL as placeholder
-                media.size = faker.number.int({ min: 5000000, max: 50000000 }).toString() // 5MB - 50MB
+                media.size = faker.number.int({ min: 5000000, max: 50000000 }) // 5MB - 50MB
                 media.thumbnailUrl = faker.image.url({ width: 640, height: 360 })
                 media.alt = faker.lorem.sentence()
                 media.metadata = {
