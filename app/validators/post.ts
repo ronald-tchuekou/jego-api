@@ -8,7 +8,14 @@ const postMediaSchema = vine.object({
   size: vine.string().trim(),
   thumbnailUrl: vine.string().trim().optional(),
   alt: vine.string().trim().optional(),
-  metadata: vine.object({}).optional(),
+  metadata: vine
+    .object({
+      width: vine.number().optional(),
+      height: vine.number().optional(),
+      duration: vine.number().optional(),
+      aspectRatio: vine.string().trim().optional(),
+    })
+    .optional(),
 })
 
 export const storePostValidator = vine.compile(
