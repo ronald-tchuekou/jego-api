@@ -1,10 +1,11 @@
 {
   "name": "jego-api",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "license": "UNLICENSED",
   "scripts": {
+    "setup": "cd build && npm ci --omit=dev",
     "start": "node build/bin/server.js",
     "build": "node ace build",
     "dev": "node ace serve --hmr",
