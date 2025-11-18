@@ -9,6 +9,7 @@
 
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
+import transmit from '@adonisjs/transmit/services/main'
 
 const AuthController = () => import('#controllers/auth_controller')
 const MeController = () => import('#controllers/me_controller')
@@ -23,6 +24,15 @@ const FilesController = () => import('#controllers/files_controller')
 const JobsController = () => import('#controllers/jobs_controller')
 const JobApplicationsController = () => import('#controllers/job_applications_controller')
 const AppointmentsController = () => import('#controllers/appointments_controller')
+const UserCVsController = () => import('#controllers/user_cvs_controller')
+const CompanyFollowingController = () => import('#controllers/company_followings_controller')
+const PostLikesController = () => import('#controllers/post_likes_controller')
+const PostSharesController = () => import('#controllers/post_shares_controller')
+const PostCommentsController = () => import('#controllers/post_comments_controller')
+const PostCommentResponsesController = () =>
+  import('#controllers/post_comment_responses_controller')
+const ConversationsController = () => import('#controllers/conversations_controller')
+const MessagesController = () => import('#controllers/messages_controller')
 
 router.get('', async () => {
   return {
@@ -88,7 +98,7 @@ router
       .prefix('users')
 
     /**
-     * Categories routes
+     * Category routes
      */
     router
       .group(() => {
@@ -201,6 +211,7 @@ router
      */
     router
       .group(() => {
+        router.post('single', [FilesController, 'uploadSingleFile'])
         router.post('upload-single', [FilesController, 'uploadSingle'])
         router.post('upload-multiple', [FilesController, 'uploadMultiple'])
         router.get('load', [FilesController, 'load'])
@@ -292,6 +303,147 @@ router
       })
       .prefix('appointments')
 
+    /**
+     * User CVs routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get('', [UserCVsController, 'index'])
+            router.post('', [UserCVsController, 'store'])
+            router.get('count', [UserCVsController, 'getTotal'])
+            router.get('user/:userId', [UserCVsController, 'getByUser'])
+            router.get(':id', [UserCVsController, 'show'])
+            router.put(':id', [UserCVsController, 'update'])
+            router.delete(':id', [UserCVsController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('user-cvs')
+
+    /**
+     * Company Following routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get('followers/:companyId', [CompanyFollowingController, 'getCompanyFollowers'])
+            router.get(':companyId/:userId', [CompanyFollowingController, 'getUserFollowing'])
+            router.patch(':companyId', [CompanyFollowingController, 'store'])
+            router.delete(':companyId', [CompanyFollowingController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('company-following')
+
+    /**
+     * Post-Like routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get(':postId/:userId', [PostLikesController, 'getUserLike'])
+            router.patch(':postId', [PostLikesController, 'store'])
+            router.delete(':postId', [PostLikesController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('post-likes')
+
+    /**
+     * Post-Share routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get(':postId/:userId', [PostSharesController, 'getUserShare'])
+            router.patch(':postId', [PostSharesController, 'store'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('post-shares')
+
+    /**
+     * Post-Comment routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get(':postId', [PostCommentsController, 'getPostComments'])
+            router.post(':postId', [PostCommentsController, 'store'])
+            router.put(':id', [PostCommentsController, 'update'])
+            router.delete(':id', [PostCommentsController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('post-comments')
+
+    /**
+     * Post-Comment-Response routes
+     */
+    router
+      .group(() => {
+        // Protected routes
+        router
+          .group(() => {
+            router.get(':postCommentId', [
+              PostCommentResponsesController,
+              'getPostCommentResponses',
+            ])
+            router.post(':postCommentId', [PostCommentResponsesController, 'store'])
+            router.put(':id', [PostCommentResponsesController, 'update'])
+            router.delete(':id', [PostCommentResponsesController, 'destroy'])
+          })
+          .middleware([middleware.auth()])
+      })
+      .prefix('post-comment-responses')
+
+    /**
+     * Chat routes
+     */
+    router
+      .group(() => {
+        // Conversations
+        router
+          .group(() => {
+            router.get('', [ConversationsController, 'index'])
+            router.post('', [ConversationsController, 'store'])
+            router.get('unread-count', [ConversationsController, 'unreadCount'])
+            router.get('search-messages', [ConversationsController, 'searchMessages'])
+            router.get(':id', [ConversationsController, 'show'])
+            router.get(':id/messages', [ConversationsController, 'getMessages'])
+            router.patch(':id/mark-read', [ConversationsController, 'markAsRead'])
+            router.post(':id/participants', [ConversationsController, 'addParticipant'])
+            router.delete(':id/participants', [ConversationsController, 'removeParticipant'])
+            router.post(':id/typing', [ConversationsController, 'typing'])
+            router.get(':id/active-users', [ConversationsController, 'activeUsers'])
+            router.get('user-status/:userId', [ConversationsController, 'userStatus'])
+          })
+          .prefix('conversations')
+
+        // Messages
+        router
+          .group(() => {
+            router.post('', [MessagesController, 'store'])
+            router.delete(':id', [MessagesController, 'destroy'])
+          })
+          .prefix('messages')
+      })
+      .prefix('chat')
+      .middleware([middleware.auth()])
+
     router.get('storage/*', [DownloadFileController, 'download'])
   })
   .prefix('v1')
+
+transmit.registerRoutes()

@@ -5,6 +5,7 @@ import { inject } from '@adonisjs/core'
 export default class UpdateUserLastLogin {
   @inject()
   async handle(event: UserLoggedIn, userService: UserService) {
+    if (true) return
     const { user } = event
     await userService.updateLastLogin(user.id)
   }

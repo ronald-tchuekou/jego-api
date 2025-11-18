@@ -1,4 +1,5 @@
 import Post from '#models/post'
+import PostMedia from '#models/post_media'
 import User, { UserRole } from '#models/user'
 import { faker } from '@faker-js/faker'
 
@@ -9,7 +10,7 @@ interface FakePostData {
   status: string
   type: string
   category: string
-  image: string | null
+  mediaType: 'image' | 'video' | null
 }
 
 /**
@@ -72,6 +73,15 @@ export async function createFakePosts(): Promise<void> {
       const postCount = faker.number.int({ min: 4, max: 8 })
 
       for (let i = 0; i < postCount; i++) {
+        // Decide on media type: 40% no media, 40% image, 20% video
+        const mediaRandom = Math.random()
+        let mediaType: 'image' | 'video' | null = null
+        if (mediaRandom > 0.6) {
+          mediaType = 'image'
+        } else if (mediaRandom > 0.4) {
+          mediaType = 'video'
+        }
+
         const postData: FakePostData = {
           userId: user.id,
           title: faker.lorem.sentence({ min: 4, max: 8 }),
@@ -79,7 +89,7 @@ export async function createFakePosts(): Promise<void> {
           status: faker.helpers.arrayElement(postStatuses),
           type: faker.helpers.arrayElement(postTypes),
           category: faker.helpers.arrayElement(postCategories),
-          image: Math.random() > 0.5 ? faker.image.url({ width: 800, height: 600 }) : null, // 50% chance of having an image
+          mediaType,
         }
 
         try {
@@ -90,13 +100,58 @@ export async function createFakePosts(): Promise<void> {
           post.status = postData.status
           post.type = postData.type
           post.category = postData.category
-          post.image = postData.image
+          post.mediaType = postData.mediaType
 
           await post.save()
           totalPostsCreated++
 
+          // Create media files if the post has a media type
+          if (mediaType) {
+            const mediaCount = faker.number.int({ min: 1, max: 3 }) // 1-3 media files per post
+
+            for (let j = 0; j < mediaCount; j++) {
+              const media = new PostMedia()
+              media.postId = post.id
+
+              if (mediaType === 'image') {
+                const width = faker.number.int({ min: 800, max: 1920 })
+                const height = faker.number.int({ min: 600, max: 1080 })
+                media.name = `${faker.word.noun()}_${Date.now()}_${j}.jpg`
+                media.type = 'image/jpeg'
+                media.url = faker.image.url({ width, height })
+                media.size = faker.number.int({ min: 50000, max: 2000000 }) // 50KB - 2MB
+                media.thumbnailUrl = faker.image.url({ width: 300, height: 300 })
+                media.alt = faker.lorem.sentence()
+                media.metadata = {
+                  width,
+                  height,
+                  aspectRatio: Number((width / height).toFixed(2)),
+                }
+              } else {
+                // video
+                const width = faker.number.int({ min: 1280, max: 1920 })
+                const height = faker.number.int({ min: 720, max: 1080 })
+                const duration = faker.number.int({ min: 10, max: 300 }) // 10s - 5min
+                media.name = `${faker.word.noun()}_${Date.now()}_${j}.mp4`
+                media.type = 'video/mp4'
+                media.url = faker.image.url({ width, height }) // Using image URL as placeholder
+                media.size = faker.number.int({ min: 5000000, max: 50000000 }) // 5MB - 50MB
+                media.thumbnailUrl = faker.image.url({ width: 640, height: 360 })
+                media.alt = faker.lorem.sentence()
+                media.metadata = {
+                  width,
+                  height,
+                  duration,
+                  aspectRatio: Number((width / height).toFixed(2)),
+                }
+              }
+
+              await media.save()
+            }
+          }
+
           console.log(
-            `  ✅ Created post: "${postData.title.substring(0, 50)}..." (${postData.type}/${postData.category})`
+            `  ✅ Created post: "${postData.title.substring(0, 50)}..." (${postData.type}/${postData.category})${mediaType ? ` with ${mediaType} media` : ''}`
           )
         } catch (error) {
           console.log(
@@ -116,7 +171,8 @@ export async function createFakePosts(): Promise<void> {
     console.log('   - Random status (active, inactive, pending, approved, rejected)')
     console.log('   - Random type (announcement, news, promotion, event, etc.)')
     console.log('   - Random category (business, technology, services, etc.)')
-    console.log('   - 50% chance of having an image URL')
+    console.log('   - Media type (40% no media, 40% image, 20% video)')
+    console.log('   - Posts with media have 1-3 PostMedia records with realistic metadata')
     console.log('\n🎉 Fake posts creation completed successfully!')
   } catch (error) {
     console.error('❌ Error creating fake posts:', error.message)

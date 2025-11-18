@@ -1,0 +1,1 @@
+{"version":3,"file":"appointment_created.js","sourceRoot":"","sources":["../../../app/events/appointment_created.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,SAAS,EAAE,MAAM,uBAAuB,CAAA;AAEjD,MAAM,CAAC,OAAO,OAAO,kBAAmB,SAAQ,SAAS;IACpC;IAAnB,YAAmB,WAAwB;QACzC,KAAK,EAAE,CAAA;QADU,gBAAW,GAAX,WAAW,CAAa;IAE3C,CAAC;CACF"}

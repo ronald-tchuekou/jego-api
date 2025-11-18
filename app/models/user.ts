@@ -1,6 +1,7 @@
 import Company from '#models/company'
 import Job from '#models/job'
 import Post from '#models/post'
+import UserCV from '#models/user_cv'
 import UserToken from '#models/user_token'
 import { AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
@@ -105,6 +106,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => Appointment)
   declare appointments: HasMany<typeof Appointment>
+
+  @hasMany(() => UserCV)
+  declare cvs: HasMany<typeof UserCV>
 
   currentAccessToken?: AccessToken
 }
