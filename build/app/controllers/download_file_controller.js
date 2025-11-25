@@ -14,11 +14,14 @@ export default class DownloadFileController {
     }
     async stream({ response, request }) {
         const filePath = request.param('*').join(sep);
-        const absolutePath = app.makePath(`storage/${filePath}`);
-        const allowedDir = app.makePath('storage');
-        if (!absolutePath.startsWith(allowedDir)) {
-            return response.status(403).send('Forbidden');
-        }
+        const absolutePath = `storage/${filePath}`;
+        return response.stream(createReadStream(absolutePath), (error) => {
+            return [error.message, 400];
+        });
+    }
+    async streamV2({ response, request }) {
+        const filePath = request.param('*').join(sep);
+        const absolutePath = `storage/${filePath}`;
         try {
             const stats = await stat(absolutePath);
             const fileSize = stats.size;
