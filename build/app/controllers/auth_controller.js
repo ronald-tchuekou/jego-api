@@ -33,6 +33,7 @@ export default class AuthController {
         catch (error) {
             return response.badRequest({
                 message: 'Votre adresse e-mail ou mot de passe est incorrect.',
+                error: error.message,
             });
         }
     }
