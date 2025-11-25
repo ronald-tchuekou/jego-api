@@ -33,13 +33,15 @@ export default class AuthController {
         catch (error) {
             return response.badRequest({
                 message: 'Votre adresse e-mail ou mot de passe est incorrect.',
+                error: error.message,
             });
         }
     }
     async register({ request, response }, userService) {
         const data = await request.validateUsing(registerValidator);
         const user = await userService.create(data);
-        await user.load('company');
+        if (data.companyId)
+            await user.load('company');
         const token = await User.accessTokens.create(user, TokenUtil.getUserAbilities(user), {
             expiresIn: '30d',
         });

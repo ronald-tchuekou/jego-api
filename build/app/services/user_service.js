@@ -50,7 +50,8 @@ let UserService = class UserService {
             throw new Error('User already exists');
         }
         const savedUser = await user.save();
-        await savedUser.load('company');
+        if (data.companyId)
+            await savedUser.load('company');
         UserRegistered.dispatch(savedUser);
         return savedUser;
     }
@@ -62,7 +63,8 @@ let UserService = class UserService {
             }
         });
         const savedUser = await user.save();
-        await savedUser.load('company');
+        if (savedUser.companyId)
+            await savedUser.load('company');
         UserUpdated.dispatch(savedUser);
         return savedUser;
     }
@@ -78,14 +80,16 @@ let UserService = class UserService {
         }
         user.verifiedAt = DateTime.now();
         user = await user.save();
-        await user.load('company');
+        if (user.companyId)
+            await user.load('company');
         await userTokenService.delete(token);
         UserVerified.dispatch(user);
         return user;
     }
     async verifyNewEmail(userId, token) {
         let user = await User.findOrFail(userId);
-        await user.load('company');
+        if (user.companyId)
+            await user.load('company');
         if (!user.updateEmailRequest) {
             throw new Error("Aucune demande de mise à jour d'email trouvée.");
         }
@@ -100,7 +104,8 @@ let UserService = class UserService {
         let user = await User.findOrFail(userId);
         user.lastLoginAt = DateTime.now();
         user = await user.save();
-        await user.load('company');
+        if (user.companyId)
+            await user.load('company');
         return user;
     }
     async requestPasswordReset(email) {

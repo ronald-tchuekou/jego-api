@@ -442,6 +442,7 @@ router
       .prefix('chat')
       .middleware([middleware.auth()])
 
+    router.get('stream/*', [DownloadFileController, 'stream'])
     router.get('storage/*', [DownloadFileController, 'download'])
   })
   .prefix('v1')
