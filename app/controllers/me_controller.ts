@@ -166,7 +166,7 @@ export default class MeController {
 
     const isPasswordValid = await user.verifyPassword(data.password)
     if (!isPasswordValid) {
-      return response.badRequest('Mot de passe incorrect')
+      return response.badRequest({ error: 'Mot de passe incorrect' })
     }
 
     user.firstName = 'Supprimé'
