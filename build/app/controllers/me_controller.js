@@ -51,7 +51,7 @@ export default class MeController {
     async uploadImageProfile({ request, response, auth }) {
         const { image } = await request.validateUsing(imageProfileValidator);
         if (!image) {
-            return response.badRequest('Une image est requise.');
+            return response.badRequest({ message: 'Une image est requise.' });
         }
         const filename = `${auth.user.id}_avatar.${image.extname}`;
         await image.move(USER_PROFILE_STORAGE_PATH, {
@@ -69,12 +69,12 @@ export default class MeController {
         const data = await request.validateUsing(updateMeEmailValidator);
         const tempUser = await userService.findByEmail(data.email);
         if (tempUser) {
-            return response.badRequest('Cette adresse e-mail est déjà utilisée.');
+            return response.badRequest({ message: 'Cette adresse e-mail est déjà utilisée.' });
         }
         const user = auth.user;
         const isPasswordValid = await user.verifyPassword(data.password);
         if (!isPasswordValid) {
-            return response.badRequest('Mot de passe incorrect');
+            return response.badRequest({ message: 'Mot de passe incorrect' });
         }
         user.updateEmailRequest = data.email;
         await user.save();
@@ -108,7 +108,7 @@ export default class MeController {
         const user = auth.user;
         const isPasswordValid = await user.verifyPassword(data.currentPassword);
         if (!isPasswordValid) {
-            return response.badRequest('Mot de passe incorrect');
+            return response.badRequest({ message: 'Mot de passe incorrect' });
         }
         user.password = data.newPassword;
         await user.save();
@@ -123,7 +123,7 @@ export default class MeController {
         const user = auth.user;
         const isPasswordValid = await user.verifyPassword(data.password);
         if (!isPasswordValid) {
-            return response.badRequest('Mot de passe incorrect');
+            return response.badRequest({ message: 'Mot de passe incorrect' });
         }
         user.firstName = 'Supprimé';
         user.lastName = 'Supprimé';
