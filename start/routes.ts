@@ -443,6 +443,7 @@ router
       .middleware([middleware.auth()])
 
     router.get('stream/*', [DownloadFileController, 'stream'])
+    router.get('stream-v2/*', [DownloadFileController, 'streamV2'])
     router.get('storage/*', [DownloadFileController, 'download'])
   })
   .prefix('v1')
