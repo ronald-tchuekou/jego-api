@@ -11,6 +11,7 @@ import Participant from '#models/participant';
 import { inject } from '@adonisjs/core';
 import db from '@adonisjs/lucid/services/db';
 import transmit from '@adonisjs/transmit/services/main';
+import pusher from '#config/pusher';
 let ChatService = class ChatService {
     async createConversation(data) {
         const { participantIds } = data;
@@ -109,7 +110,7 @@ let ChatService = class ChatService {
         await Conversation.query().where('id', conversationId).update({
             updatedAt: new Date(),
         });
-        await this.broadcastMessage(conversationId, message);
+        this.broadcastMessage(conversationId, message).then();
         return message;
     }
     async markMessagesAsRead(conversationId, userId) {
@@ -125,7 +126,7 @@ let ChatService = class ChatService {
             .where('senderId', '!=', userId)
             .where('isRead', false)
             .update({ isRead: true });
-        await transmit.broadcast(`conversation.${conversationId}`, {
+        transmit.broadcast(`conversation.${conversationId}`, {
             type: 'messages_read',
             data: JSON.stringify({
                 userId,
@@ -171,7 +172,7 @@ let ChatService = class ChatService {
         }
         await MessageAttachment.query().where('messageId', messageId).delete();
         await message.delete();
-        await transmit.broadcast(`conversation.${message.conversationId}`, {
+        transmit.broadcast(`conversation.${message.conversationId}`, {
             type: 'message_deleted',
             data: JSON.stringify({
                 messageId,
@@ -198,7 +199,7 @@ let ChatService = class ChatService {
             conversationId,
             userId,
         });
-        await transmit.broadcast(`conversation.${conversationId}`, {
+        transmit.broadcast(`conversation.${conversationId}`, {
             type: 'participant_added',
             data: JSON.stringify({
                 conversationId,
@@ -223,7 +224,7 @@ let ChatService = class ChatService {
             throw new Error('User is not a participant');
         }
         await participant.delete();
-        await transmit.broadcast(`conversation.${conversationId}`, {
+        transmit.broadcast(`conversation.${conversationId}`, {
             type: 'participant_removed',
             data: JSON.stringify({
                 conversationId,
@@ -231,6 +232,13 @@ let ChatService = class ChatService {
                 removedBy,
             }),
         });
+        pusher
+            .trigger(`${userId}`, 'participant_removed', {
+            conversationId,
+            userId,
+            removedBy,
+        })
+            .then();
     }
     async findExistingConversation(participantIds) {
         if (participantIds.length !== 2) {
@@ -240,14 +248,12 @@ let ChatService = class ChatService {
             .from('conversations')
             .join('participants as p1', 'conversations.id', 'p1.conversation_id')
             .join('participants as p2', 'conversations.id', 'p2.conversation_id')
-            .where('p1.user_id', participantIds[0])
-            .where('p2.user_id', participantIds[1])
-            .whereRaw('p1.user_id != p2.user_id')
             .select('conversations.id')
-            .groupBy('conversations.id')
-            .havingRaw('COUNT(DISTINCT CASE WHEN p1.user_id = ? OR p1.user_id = ? THEN p1.user_id END) = ?', [participantIds[0], participantIds[1], participantIds.length]);
+            .whereIn('p1.user_id', participantIds)
+            .whereIn('p2.user_id', participantIds)
+            .whereRaw('p1.user_id != p2.user_id');
         if (conversations.length > 0) {
-            return await Conversation.query()
+            return Conversation.query()
                 .where('id', conversations[0].id)
                 .preload('participants', (query) => {
                 query.preload('user');
@@ -257,9 +263,18 @@ let ChatService = class ChatService {
         return null;
     }
     async broadcastMessage(conversationId, message) {
-        await transmit.broadcast(`conversation.${conversationId}`, {
+        transmit.broadcast(`conversation.${conversationId}`, {
             type: 'new_message',
             data: JSON.stringify(message),
+        });
+        const participants = await Participant.query().where('conversationId', conversationId);
+        participants.forEach((participant) => {
+            pusher
+                .trigger(participant.userId, 'new_message', {
+                conversationId,
+                message,
+            })
+                .then();
         });
     }
 };

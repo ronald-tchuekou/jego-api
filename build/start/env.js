@@ -19,5 +19,9 @@ export default await Env.create(new URL('../', import.meta.url), {
     SMTP_PASSWORD: Env.schema.string(),
     SMTP_FROM: Env.schema.string(),
     SMTP_FROM_NAME: Env.schema.string(),
+    PUSHER_APP_ID: Env.schema.string(),
+    PUSHER_KEY: Env.schema.string(),
+    PUSHER_SECRET: Env.schema.string(),
+    PUSHER_CLUSTER: Env.schema.string(),
 });
 //# sourceMappingURL=env.js.map
