@@ -187,7 +187,7 @@ let ConversationsController = class ConversationsController {
             const user = auth.getUserOrFail();
             const { id } = params;
             const { isTyping } = request.only(['isTyping']);
-            await chatTransmit.broadcastTyping(id, user.id, isTyping || false);
+            chatTransmit.broadcastTyping(id, user.id, isTyping || false).then();
             return response.ok({
                 success: true,
                 message: 'Typing indicator sent',
