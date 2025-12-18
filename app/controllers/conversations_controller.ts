@@ -230,7 +230,7 @@ export default class ConversationsController {
       const { id } = params
       const { isTyping } = request.only(['isTyping'])
 
-      await chatTransmit.broadcastTyping(id, user.id, isTyping || false)
+      chatTransmit.broadcastTyping(id, user.id, isTyping || false).then()
 
       return response.ok({
         success: true,

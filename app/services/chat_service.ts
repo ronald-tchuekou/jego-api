@@ -5,6 +5,7 @@ import Participant from '#models/participant'
 import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
 import transmit from '@adonisjs/transmit/services/main'
+import pusher from '#config/pusher'
 
 export interface CreateConversationData {
   participantIds: string[]
@@ -41,7 +42,7 @@ export default class ChatService {
       return existingConversation
     }
 
-    // Create new conversation
+    // Create a new conversation
     const conversation = await Conversation.create({})
 
     // Add participants
@@ -61,7 +62,7 @@ export default class ChatService {
   }
 
   /**
-   * Get conversations for a user (returns all conversations with last message only)
+   * Get conversations for a user (returns all conversations with the last message only)
    */
   async getUserConversations(userId: string): Promise<Conversation[]> {
     return Conversation.query()
@@ -141,7 +142,7 @@ export default class ChatService {
       throw new Error('You are not a participant in this conversation')
     }
 
-    // Create message
+    // Create a message
     const message = await Message.create({
       conversationId,
       senderId,
@@ -171,7 +172,7 @@ export default class ChatService {
     })
 
     // Emit real-time event to conversation participants
-    await this.broadcastMessage(conversationId, message)
+    this.broadcastMessage(conversationId, message).then()
 
     return message
   }
@@ -198,7 +199,7 @@ export default class ChatService {
       .update({ isRead: true })
 
     // Emit read status update
-    await transmit.broadcast(`conversation.${conversationId}`, {
+    transmit.broadcast(`conversation.${conversationId}`, {
       type: 'messages_read',
       data: JSON.stringify({
         userId,
@@ -208,7 +209,7 @@ export default class ChatService {
   }
 
   /**
-   * Get unread message count for user
+   * Get unread message count for a user
    */
   async getUnreadCount(userId: string): Promise<number> {
     const result = await db
@@ -260,11 +261,11 @@ export default class ChatService {
     // Delete attachments first
     await MessageAttachment.query().where('messageId', messageId).delete()
 
-    // Delete message
+    // Delete a message
     await message.delete()
 
     // Emit deletion event
-    await transmit.broadcast(`conversation.${message.conversationId}`, {
+    transmit.broadcast(`conversation.${message.conversationId}`, {
       type: 'message_deleted',
       data: JSON.stringify({
         messageId,
@@ -274,7 +275,7 @@ export default class ChatService {
   }
 
   /**
-   * Add participant to conversation
+   * Add a participant to a conversation
    */
   async addParticipant(conversationId: string, userId: string, addedBy: string): Promise<void> {
     // Verify addedBy is participant
@@ -304,7 +305,7 @@ export default class ChatService {
     })
 
     // Emit participant added event
-    await transmit.broadcast(`conversation.${conversationId}`, {
+    transmit.broadcast(`conversation.${conversationId}`, {
       type: 'participant_added',
       data: JSON.stringify({
         conversationId,
@@ -315,7 +316,7 @@ export default class ChatService {
   }
 
   /**
-   * Remove participant from conversation
+   * Remove a participant from a conversation
    */
   async removeParticipant(
     conversationId: string,
@@ -345,7 +346,7 @@ export default class ChatService {
     await participant.delete()
 
     // Emit participant removed event
-    await transmit.broadcast(`conversation.${conversationId}`, {
+    transmit.broadcast(`conversation.${conversationId}`, {
       type: 'participant_removed',
       data: JSON.stringify({
         conversationId,
@@ -353,6 +354,13 @@ export default class ChatService {
         removedBy,
       }),
     })
+    pusher
+      .trigger(`${userId}`, 'participant_removed', {
+        conversationId,
+        userId,
+        removedBy,
+      })
+      .then()
   }
 
   /**
@@ -367,18 +375,13 @@ export default class ChatService {
       .from('conversations')
       .join('participants as p1', 'conversations.id', 'p1.conversation_id')
       .join('participants as p2', 'conversations.id', 'p2.conversation_id')
-      .where('p1.user_id', participantIds[0])
-      .where('p2.user_id', participantIds[1])
-      .whereRaw('p1.user_id != p2.user_id')
       .select('conversations.id')
-      .groupBy('conversations.id')
-      .havingRaw(
-        'COUNT(DISTINCT CASE WHEN p1.user_id = ? OR p1.user_id = ? THEN p1.user_id END) = ?',
-        [participantIds[0], participantIds[1], participantIds.length]
-      )
+      .whereIn('p1.user_id', participantIds)
+      .whereIn('p2.user_id', participantIds)
+      .whereRaw('p1.user_id != p2.user_id')
 
     if (conversations.length > 0) {
-      return await Conversation.query()
+      return Conversation.query()
         .where('id', conversations[0].id)
         .preload('participants', (query) => {
           query.preload('user')
@@ -393,9 +396,21 @@ export default class ChatService {
    * Broadcast message to conversation participants
    */
   private async broadcastMessage(conversationId: string, message: Message): Promise<void> {
-    await transmit.broadcast(`conversation.${conversationId}`, {
+    transmit.broadcast(`conversation.${conversationId}`, {
       type: 'new_message',
       data: JSON.stringify(message),
+    })
+
+    // With pusher.
+    const participants = await Participant.query().where('conversationId', conversationId)
+
+    participants.forEach((participant) => {
+      pusher
+        .trigger(participant.userId, 'new_message', {
+          conversationId,
+          message,
+        })
+        .then()
     })
   }
 }
