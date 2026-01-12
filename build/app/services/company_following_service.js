@@ -47,6 +47,29 @@ export default class CompanyFollowingService {
             data: result.data.map((item) => item.user),
         };
     }
+    async getUserFollowings(filters) {
+        const { userId, search = '', page = 1, limit = 10 } = filters;
+        let queryBuilder = CompanyFollowing.query()
+            .where('userId', userId)
+            .whereHas('company', (query) => {
+            if (search) {
+                query.whereILike('name', `%${search}%`);
+                query.orWhereILike('description', `%${search}%`);
+                query.orWhereILike('email', `%${search}%`);
+                query.orWhereILike('phone', `%${search}%`);
+                query.orWhereILike('city', `%${search}%`);
+            }
+        })
+            .preload('company', (query) => {
+            query.preload('category');
+        });
+        const followings = await queryBuilder.orderBy('createdAt', 'desc').paginate(page, limit);
+        const result = followings.toJSON();
+        return {
+            ...result,
+            data: result.data.map((item) => item.company),
+        };
+    }
     async getUserFollowing(userId, companyId) {
         return CompanyFollowing.findBy({ companyId, userId });
     }
