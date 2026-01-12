@@ -44,6 +44,28 @@ export default class CompanyFollowingsController {
     }
   }
 
+  async getUserFollowings({ request, response }: HttpContext) {
+    try {
+      const userId = request.param('userId')
+      const { page = 1, limit = 10, search = '' } = request.qs()
+
+      const followings = await this.companyFollowingService.getUserFollowings({
+        userId,
+        page,
+        limit,
+        search,
+      })
+
+      return response.ok(followings)
+    } catch (error) {
+      logger.error('Error on getting user followings: ', JSON.stringify(error, null, 2))
+      return response.badRequest({
+        message: 'Une erreur est survenue lors de la récupération des entreprises suivies.',
+        error: error.message,
+      })
+    }
+  }
+
   async store({ request, auth, response }: HttpContext) {
     try {
       const companyId = request.param('companyId')

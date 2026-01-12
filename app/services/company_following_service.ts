@@ -80,6 +80,44 @@ export default class CompanyFollowingService {
     }
   }
 
+  /**
+   * Get companies followed by a user
+   * @param filters - The filters
+   * @returns The companies
+   */
+  async getUserFollowings(filters: {
+    userId: string
+    search?: string
+    page?: number
+    limit?: number
+  }) {
+    const { userId, search = '', page = 1, limit = 10 } = filters
+
+    let queryBuilder = CompanyFollowing.query()
+      .where('userId', userId)
+      .whereHas('company', (query) => {
+        if (search) {
+          query.whereILike('name', `%${search}%`)
+          query.orWhereILike('description', `%${search}%`)
+          query.orWhereILike('email', `%${search}%`)
+          query.orWhereILike('phone', `%${search}%`)
+          query.orWhereILike('city', `%${search}%`)
+        }
+      })
+      .preload('company', (query) => {
+        query.preload('category')
+      })
+
+    const followings = await queryBuilder.orderBy('createdAt', 'desc').paginate(page, limit)
+
+    const result = followings.toJSON()
+
+    return {
+      ...result,
+      data: (result.data as CompanyFollowing[]).map((item) => item.company),
+    }
+  }
+
   async getUserFollowing(userId: string, companyId: string) {
     return CompanyFollowing.findBy({ companyId, userId })
   }
