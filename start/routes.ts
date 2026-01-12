@@ -332,6 +332,7 @@ router
         router
           .group(() => {
             router.get('followers/:companyId', [CompanyFollowingController, 'getCompanyFollowers'])
+            router.get('user/:userId', [CompanyFollowingController, 'getUserFollowings'])
             router.get(':companyId/:userId', [CompanyFollowingController, 'getUserFollowing'])
             router.patch(':companyId', [CompanyFollowingController, 'store'])
             router.delete(':companyId', [CompanyFollowingController, 'destroy'])
